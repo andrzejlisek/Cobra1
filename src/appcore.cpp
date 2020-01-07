@@ -1,0 +1,666 @@
+#include "appcore.h"
+
+AppCore::AppCore()
+{
+    string AppDir = Eden::ApplicationDirectory();
+
+    BeepSound = NULL;
+
+    Tape_ = new Tape();
+    fstream F(AppDir + "sound.wav", ios::in | ios::binary);
+    if (F.is_open())
+    {
+        char * Temp = new char[4];
+        F.seekg(40);
+        F.read(Temp, 4);
+        Tape_->UInt32__.Raw[0] = Temp[0];
+        Tape_->UInt32__.Raw[1] = Temp[1];
+        Tape_->UInt32__.Raw[2] = Temp[2];
+        Tape_->UInt32__.Raw[3] = Temp[3];
+        delete[] Temp;
+        BeepSoundL = Tape_->UInt32__.Val;
+        Temp = new char[BeepSoundL];
+        F.seekg(40);
+        F.read(Temp, BeepSoundL);
+        BeepSoundL = BeepSoundL >> 1;
+        BeepSound = new short[BeepSoundL];
+        for (int I = 0; I < BeepSoundL; I++)
+        {
+            Tape_->Int16__.Raw[0] = Temp[(I << 1) + 0];
+            Tape_->Int16__.Raw[1] = Temp[(I << 1) + 1];
+            BeepSound[I] = Tape_->Int16__.Val;
+        }
+        delete[] Temp;
+        F.close();
+    }
+    else
+    {
+        BeepSoundL = 1;
+        BeepSound = new short[1];
+        BeepSound[0] = 0;
+    }
+    BeepSoundI = BeepSoundL;
+
+    Screen_ = new Screen();
+    Keyboard_ = new Keyboard();
+    CpuMem_ = new CpuMem();
+    Screen_->CpuMem_ = CpuMem_;
+    CpuMem_->Keyboard_ = Keyboard_;
+    CpuMem_->Tape_ = Tape_;
+
+    CpuMem_->LoadRom(AppDir, FileRom, FileLst, FileRam);
+    Screen_->LoadRom(AppDir, FileChr);
+    CpuMem_->Reset(1);
+}
+
+AppCore::~AppCore()
+{
+    delete Tape_;
+    delete Screen_;
+    delete Keyboard_;
+    delete CpuMem_;
+    delete[] BeepSound;
+}
+
+void AppCore::PlayBeep()
+{
+    if (CpuMem_->SoundSignal)
+    {
+        CpuMem_->SoundSignal = false;
+        BeepSoundI = 0;
+    }
+}
+
+short AppCore::GetSample()
+{
+    int SoundSample = 0;
+
+    char XX = CpuMem_->SoundBuf.front();
+    if (CpuMem_->SoundBuf.size() > 1)
+    {
+        CpuMem_->SoundBuf.pop();
+    }
+    switch (XX)
+    {
+        case 0:
+            SoundSample = 16000 * SoundVolumeGen;
+            break;
+        case 1:
+            SoundSample = 0;
+        case 2:
+            break;
+        case 3:
+            SoundSample = -16000 * SoundVolumeGen;
+            break;
+    }
+
+    if (BeepSoundI < BeepSoundL)
+    {
+        int X = BeepSound[BeepSoundI];
+        SoundSample += (X * SoundVolumeBeep);
+        BeepSoundI++;
+    }
+    return SoundSample >> 8;
+}
+
+void AppCore::LoadDataBin(string FileName, int Addr1)
+{
+    if (Eden::FileExists(FileName))
+    {
+        int X = Eden::FileSize(FileName);
+        fstream F(FileName, ios::binary | ios::in);
+        if (F.is_open())
+        {
+            uchar * Temp = new uchar[X];
+            F.read((char*)Temp, X);
+            F.close();
+            for (int I = 0; I < X; I++)
+            {
+                CpuMem_->Mem[I + Addr1] = Temp[I];
+            }
+            delete[] Temp;
+        }
+    }
+}
+
+void AppCore::SaveDataBin(string FileName, int Addr1, int Addr2)
+{
+    int X = Addr2 - Addr1 + 1;
+    fstream F(FileName, ios::binary | ios::out);
+    if (F.is_open())
+    {
+        uchar * Temp = new uchar[X];
+        for (int I = 0; I < X; I++)
+        {
+            Temp[I] = CpuMem_->Mem[I + Addr1];
+        }
+        F.write((char*)Temp, X);
+        F.close();
+        delete[] Temp;
+    }
+}
+
+void AppCore::LoadDataHex(string FileName)
+{
+    if (Eden::FileExists(FileName))
+    {
+        fstream F(FileName, ios::in);
+        if (F.is_open())
+        {
+            string Buf;
+            while (getline(F, Buf))
+            {
+                int A = Eden::HexToInt(Buf.substr(3, 4));
+                uchar P = (uchar)Eden::HexToInt(Buf.substr(1, 2));
+                P += (uchar)Eden::HexToInt(Buf.substr(3, 2));
+                P += (uchar)Eden::HexToInt(Buf.substr(5, 2));
+                P += (uchar)Eden::HexToInt(Buf.substr(7, 2));
+                for (uint I = 9; I < Buf.length() - 2; I++)
+                {
+                    if ((I % 2) == 0)
+                    {
+                        P += (uchar)Eden::HexToInt(Buf.substr(I - 1, 2));
+                        CpuMem_->Mem[A] = (uchar)Eden::HexToInt(Buf.substr(I - 1, 2));
+                        A++;
+                    }
+                }
+                P = 255 - P;
+                P++;
+            }
+            F.close();
+        }
+    }
+}
+
+void AppCore::SaveDataHex(string FileName, int Addr1, int Addr2)
+{
+    fstream F(FileName, ios::out);
+    if (F.is_open())
+    {
+        while (Addr1 <= Addr2)
+        {
+            int L = 16;
+            if ((Addr1 + L) >= Addr2)
+            {
+                L = Addr2 - Addr1 + 1;
+            }
+            F << ":" << Eden::IntToHex8(L) << Eden::IntToHex16(Addr1) << "00";
+            uchar P = L;
+            P += (uchar)(Addr1 >> 8);
+            P += (uchar)(Addr1 & 255);
+            for (int I = 0; I < L; I++)
+            {
+                P += CpuMem_->Mem[Addr1];
+                F << Eden::IntToHex8(CpuMem_->Mem[Addr1]);
+                Addr1++;
+            }
+            P = 255 - P;
+            P++;
+            F << Eden::IntToHex8(P) << endl;
+        }
+        F << ":00000001FF" << endl;
+        F.close();
+    }
+}
+
+
+///
+/// \brief AppCore::LoadKeysVal - Ladowanie jednego klawisza z pliku
+/// \param IsShift
+/// \param KeyCode
+///
+void AppCore::LoadKeysVal(bool P, bool R, bool IsShift, int KeyCode)
+{
+    if (IsShift)
+    {
+        if (P)
+        {
+            Keyboard_->KeyStrokes->push_back(b00000000 + (8 << 8));
+            Keyboard_->KeyStrokes->push_back(b00000000 + KeyCode);
+        }
+        if (R)
+        {
+            Keyboard_->KeyStrokes->push_back(b10000000 + KeyCode);
+            Keyboard_->KeyStrokes->push_back(b10000000 + (8 << 8));
+        }
+    }
+    else
+    {
+        if (P)
+        {
+            Keyboard_->KeyStrokes->push_back(b00000000 + KeyCode);
+        }
+        if (R)
+        {
+            Keyboard_->KeyStrokes->push_back(b10000000 + KeyCode);
+        }
+    }
+}
+
+///
+/// \brief AppCore::SetCaps - Ustawianie trybu wstawiania wielkich liter
+/// \param NewCaps - Nowy tryb
+/// \return
+///
+void AppCore::SetCaps(bool C, bool NewCaps)
+{
+    if (C && (LoadKeyStreamCaps != NewCaps))
+    {
+        LoadKeysVal(true, true, 1, (10 << 8) + b00000100);
+    }
+    LoadKeyStreamCaps = NewCaps;
+}
+
+///
+/// \brief AppCore::LoadKeys - Ladowanie pliku tekstowego jako nacisniec klawiszy
+/// \param FileName
+///
+void AppCore::LoadKeys(string FileName)
+{
+    if (Eden::FileExists(FileName))
+    {
+        int X = Eden::FileSize(FileName);
+        fstream F(FileName, ios::binary | ios::in);
+        if (F.is_open())
+        {
+            // Wczytywanie tresci pliku
+            uchar * Temp = new uchar[X];
+            F.read((char*)Temp, X);
+            F.close();
+
+            LoadKeyStream(true, true, true, 0, Temp, X);
+
+            delete[] Temp;
+        }
+    }
+}
+
+
+
+void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X)
+{
+    if (KeySpeed <= 0) { KeySpeed = 20; }
+    if (LinePause < 0) { LinePause = 0; }
+
+    // Wykrywanie typu znaku konca linii
+    int _CR = 0;
+    int _LF = 0;
+    for (int I = 0; I < X; I++)
+    {
+        if (Temp[I] == '\r') { _CR++; }
+        if (Temp[I] == '\n') { _LF++; }
+    }
+    char EOL = '\n';
+    if (_CR > _LF)
+    {
+        EOL = '\r';
+    }
+
+    if (M == 0)
+    {
+        SetCaps(C, true);
+    }
+
+    // Wypelnianie wektora nacisniec klawiszy
+    for (int I = 0; I < X; I++)
+    {
+        switch (Temp[I])
+        {
+            case '~':
+            case '_':
+                if (M == 0)
+                {
+                    Keyboard_->KeyStrokes->push_back(b01000000);
+                    Keyboard_->KeyStrokes->push_back(b01000000);
+                }
+                if (M == 1)
+                {
+                    switch (Temp[1])
+                    {
+                        case 'U': LoadKeysVal(P, R, 1, (10 << 8) + b00000000); break;
+                        case 'D': LoadKeysVal(P, R, 1, ( 8 << 8) + b00000001); break;
+                        case 'L': LoadKeysVal(P, R, 1, ( 9 << 8) + b00000000); break;
+                        case 'R': LoadKeysVal(P, R, 1, ( 9 << 8) + b00000001); break;
+                    }
+                }
+                break;
+
+            case '1':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000000); break;
+            case '!':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000000); break;
+            case '2':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000001); break;
+            case '"':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000001); break;
+            case '3':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000010); break;
+            case '#':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000010); break;
+            case '4':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000011); break;
+            case '$':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000011); break;
+            case '5':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000100); break;
+            case '%':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000100); break;
+
+            case 'Q': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000000); break;
+            case 'q': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000000); break;
+            case 'W': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000001); break;
+            case 'w': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000001); break;
+            case '{':  if (M == 1) {      LoadKeysVal(P, R, 1, (10 << 8) + b00000001); } break; // CTR
+            case 'E': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000010); break;
+            case 'e': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000010); break;
+            case 'R': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000011); break;
+            case 'r': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000011); break;
+            case 'T': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000100); break;
+            case 't': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000100); break;
+            case '`':  if (M == 1) {      LoadKeysVal(P, R, 1, (10 << 8) + b00000100); } break;
+
+            case 'A': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000000); break;
+            case 'a': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000000); break;
+            case 'S': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000001); break;
+            case 's': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000001); break;
+            case 'D': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000010); break;
+            case 'd': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000010); break;
+            case 'F': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000011); break;
+            case 'f': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000011); break;
+            case 'G': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000100); break;
+            case 'g': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000100); break;
+
+            case '\\': if (M == 1) {      LoadKeysVal(P, R, 0, ( 8 << 8) + b00000000); } break; // SH
+            case 'Z': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000001); break;
+            case 'z': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000001); break;
+            case 'X': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000010); break;
+            case 'x': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000010); break;
+            case ':':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000010); break;
+            case 'C': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000011); break;
+            case 'c': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000011); break;
+            case ';':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000011); break;
+            case 'V': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000100); break;
+            case 'v': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000100); break;
+            case '=':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000100); break;
+
+            case '6':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000100); break;
+            case '&':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000100); break;
+            case '7':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000011); break;
+            case '\'':                    LoadKeysVal(P, R, 1, (12 << 8) + b00000011); break;
+            case '8':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000010); break;
+            case '(':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000010); break;
+            case '9':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000001); break;
+            case ')':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000001); break;
+            case '0':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000000); break;
+
+            case 'Y': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000100); break;
+            case 'y': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000100); break;
+            case '@':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000100); break;
+            case 'U': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000011); break;
+            case 'u': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000011); break;
+            case '[':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000011); break;
+            case 'I': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000010); break;
+            case 'i': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000010); break;
+            case ']':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000010); break;
+            case 'O': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000001); break;
+            case 'o': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000001); break;
+            case '^':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000001); break;
+            case 'P': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000000); break;
+            case 'p': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000000); break;
+            case '}':  if (M == 1) {      LoadKeysVal(P, R, 1, (13 << 8) + b00000000); } break; // CLS
+
+            case 'H': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000100); break;
+            case 'h': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000100); break;
+            case '+':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000100); break;
+            case 'J': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000011); break;
+            case 'j': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000011); break;
+            case '-':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000011); break;
+            case 'K': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000010); break;
+            case 'k': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000010); break;
+            case '*':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000010); break;
+            case 'L': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000001); break;
+            case 'l': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000001); break;
+            case '/':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000001); break;
+            case '\r': if (EOL == '\r') { LoadKeysVal(P, R, 0, (14 << 8) + b00000000); if (M == 0) { for (int II = 0; II < LinePause; II++) { Keyboard_->KeyStrokes->push_back(b01000000); Keyboard_->KeyStrokes->push_back(b01000000); } } } break;
+            case '\n': if (EOL == '\n') { LoadKeysVal(P, R, 0, (14 << 8) + b00000000); if (M == 0) { for (int II = 0; II < LinePause; II++) { Keyboard_->KeyStrokes->push_back(b01000000); Keyboard_->KeyStrokes->push_back(b01000000); } } } break;
+
+            case 'B': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000100); break;
+            case 'b': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000100); break;
+            case '?':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000100); break;
+            case 'N': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000011); break;
+            case 'n': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000011); break;
+            case '<':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000011); break;
+            case 'M': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
+            case 'm': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
+            case '>':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000010); break;
+            case ',':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000001); break;
+            case '.':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000001); break;
+            case ' ':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000000); break;
+        }
+    }
+    if (M == 0)
+    {
+        SetCaps(C, true);
+    }
+
+    // Zlecenie przetworzenia wektora nacisniec klawiszy
+    Keyboard_->StartKeystrokes(KeySpeed);
+}
+
+
+
+void AppCore::SaveLastPath(QString X, bool OpenDir)
+{
+    if (!X.isEmpty())
+    {
+        if (OpenDir)
+        {
+            LastPath = QFileInfo(X).filePath();
+        }
+        else
+        {
+            LastPath = QFileInfo(X).path();
+        }
+    }
+}
+
+void AppCore::keyPressEvent(QKeyEvent *event)
+{
+    if (!event->isAutoRepeat())
+    {
+        if (KeybMode == 0)
+        {
+            switch ((int)event->nativeVirtualKey())
+            {
+                case 49: Keyboard_->KeyPress__(0, 11); break; // 1
+                case 50: Keyboard_->KeyPress__(1, 11); break; // 2
+                case 51: Keyboard_->KeyPress__(2, 11); break; // 3
+                case 52: Keyboard_->KeyPress__(3, 11); break; // 4
+                case 53: Keyboard_->KeyPress__(4, 11); break; // 5
+                case 54: Keyboard_->KeyPress__(4, 12); break; // 6
+                case 55: Keyboard_->KeyPress__(3, 12); break; // 7
+                case 56: Keyboard_->KeyPress__(2, 12); break; // 8
+                case 57: Keyboard_->KeyPress__(1, 12); break; // 9
+                case 48: Keyboard_->KeyPress__(0, 12); break; // 0
+
+                case 81: Keyboard_->KeyPress__(0, 10); break; // Q
+                case 87: Keyboard_->KeyPress__(1, 10); break; // W
+                case 69: Keyboard_->KeyPress__(2, 10); break; // E
+                case 82: Keyboard_->KeyPress__(3, 10); break; // R
+                case 84: Keyboard_->KeyPress__(4, 10); break; // T
+                case 89: Keyboard_->KeyPress__(4, 13); break; // Y
+                case 85: Keyboard_->KeyPress__(3, 13); break; // U
+                case 73: Keyboard_->KeyPress__(2, 13); break; // I
+                case 79: Keyboard_->KeyPress__(1, 13); break; // O
+                case 80: Keyboard_->KeyPress__(0, 13); break; // P
+
+                case 65: Keyboard_->KeyPress__(0,  9); break; // A
+                case 83: Keyboard_->KeyPress__(1,  9); break; // S
+                case 68: Keyboard_->KeyPress__(2,  9); break; // D
+                case 70: Keyboard_->KeyPress__(3,  9); break; // F
+                case 71: Keyboard_->KeyPress__(4,  9); break; // G
+                case 72: Keyboard_->KeyPress__(4, 14); break; // H
+                case 74: Keyboard_->KeyPress__(3, 14); break; // J
+                case 75: Keyboard_->KeyPress__(2, 14); break; // K
+                case 76: Keyboard_->KeyPress__(1, 14); break; // L
+                case 13: Keyboard_->KeyPress__(0, 14); break; // Enter
+
+                case 16: Keyboard_->KeyPress__(0,  8); break; // Shift
+                case 90: Keyboard_->KeyPress__(1,  8); break; // Z
+                case 88: Keyboard_->KeyPress__(2,  8); break; // X
+                case 67: Keyboard_->KeyPress__(3,  8); break; // C
+                case 86: Keyboard_->KeyPress__(4,  8); break; // V
+                case 66: Keyboard_->KeyPress__(4, 15); break; // B
+                case 78: Keyboard_->KeyPress__(3, 15); break; // N
+                case 77: Keyboard_->KeyPress__(2, 15); break; // M
+                case 188:Keyboard_->KeyPress__(1, 15); break; // ,
+                case 190:Keyboard_->KeyPress__(1, 15); break; // .
+                case 32: Keyboard_->KeyPress__(0, 15); break; // Space
+            }
+        }
+        if (KeybMode == 1)
+        {
+            bool TextKey = true;
+            switch ((int)event->nativeVirtualKey())
+            {
+                case 38: // Strzalka w gore
+                    LoadKeyStream(true, false, true, 1, (uchar*)"~U", 1);
+                    TextKey = false;
+                    break;
+                case 40: // Strzalka w dol
+                    LoadKeyStream(true, false, true, 1, (uchar*)"~D", 1);
+                    TextKey = false;
+                    break;
+                case 37: // Strzalka w lewo
+                    LoadKeyStream(true, false, true, 1, (uchar*)"~L", 1);
+                    TextKey = false;
+                    break;
+                case 39: // Strzalka w prawo
+                    LoadKeyStream(true, false, true, 1, (uchar*)"~R", 1);
+                    TextKey = false;
+                    break;
+                case 32: // Spacja
+                    LoadKeyStream(true, false, true, 1, (uchar*)" ", 1);
+                    TextKey = false;
+                    break;
+                case 13: // Enter
+                    LoadKeyStream(true, false, true, 1, (uchar*)"\n", 1);
+                    TextKey = false;
+                    break;
+                case 16: // Shift
+                    TextKey = false;
+                    break;
+            }
+            if (TextKey)
+            {
+                string KeyChar = Eden::ToStr(event->text());
+                if (KeyChar.size() > 0)
+                {
+                    if ((KeyChar[0] >= 33) && ((KeyChar[0] <= 126)))
+                    {
+                        //cout << "PRESS " << (int)KeyChar[0] << endl;
+                        LoadKeyStream(true, false, true, 1, (uchar*)KeyChar.c_str(), 1);
+                    }
+                }
+            }
+            //switch (event->text())
+            //{
+            //}
+            //cout << "PRESS " << Eden::ToStr((int)event->nativeVirtualKey()) << "  " << Eden::ToStr(event->text()) << endl;
+        }
+    }
+}
+
+void AppCore::keyReleaseEvent(QKeyEvent *event)
+{
+    if (!event->isAutoRepeat())
+    {
+        if (KeybMode == 0)
+        {
+            switch ((int)event->nativeVirtualKey())
+            {
+                case 49: Keyboard_->KeyRelease(0, 11); break; // 1
+                case 50: Keyboard_->KeyRelease(1, 11); break; // 2
+                case 51: Keyboard_->KeyRelease(2, 11); break; // 3
+                case 52: Keyboard_->KeyRelease(3, 11); break; // 4
+                case 53: Keyboard_->KeyRelease(4, 11); break; // 5
+                case 54: Keyboard_->KeyRelease(4, 12); break; // 6
+                case 55: Keyboard_->KeyRelease(3, 12); break; // 7
+                case 56: Keyboard_->KeyRelease(2, 12); break; // 8
+                case 57: Keyboard_->KeyRelease(1, 12); break; // 9
+                case 48: Keyboard_->KeyRelease(0, 12); break; // 0
+
+                case 81: Keyboard_->KeyRelease(0, 10); break; // Q
+                case 87: Keyboard_->KeyRelease(1, 10); break; // W
+                case 69: Keyboard_->KeyRelease(2, 10); break; // E
+                case 82: Keyboard_->KeyRelease(3, 10); break; // R
+                case 84: Keyboard_->KeyRelease(4, 10); break; // T
+                case 89: Keyboard_->KeyRelease(4, 13); break; // Y
+                case 85: Keyboard_->KeyRelease(3, 13); break; // U
+                case 73: Keyboard_->KeyRelease(2, 13); break; // I
+                case 79: Keyboard_->KeyRelease(1, 13); break; // O
+                case 80: Keyboard_->KeyRelease(0, 13); break; // P
+
+                case 65: Keyboard_->KeyRelease(0,  9); break; // A
+                case 83: Keyboard_->KeyRelease(1,  9); break; // S
+                case 68: Keyboard_->KeyRelease(2,  9); break; // D
+                case 70: Keyboard_->KeyRelease(3,  9); break; // F
+                case 71: Keyboard_->KeyRelease(4,  9); break; // G
+                case 72: Keyboard_->KeyRelease(4, 14); break; // H
+                case 74: Keyboard_->KeyRelease(3, 14); break; // J
+                case 75: Keyboard_->KeyRelease(2, 14); break; // K
+                case 76: Keyboard_->KeyRelease(1, 14); break; // L
+                case 13: Keyboard_->KeyRelease(0, 14); break; // Enter
+
+                case 16: Keyboard_->KeyRelease(0,  8); break; // Shift
+                case 90: Keyboard_->KeyRelease(1,  8); break; // Z
+                case 88: Keyboard_->KeyRelease(2,  8); break; // X
+                case 67: Keyboard_->KeyRelease(3,  8); break; // C
+                case 86: Keyboard_->KeyRelease(4,  8); break; // V
+                case 66: Keyboard_->KeyRelease(4, 15); break; // B
+                case 78: Keyboard_->KeyRelease(3, 15); break; // N
+                case 77: Keyboard_->KeyRelease(2, 15); break; // M
+                case 188:Keyboard_->KeyRelease(1, 15); break; // ,
+                case 190:Keyboard_->KeyRelease(1, 15); break; // .
+                case 32: Keyboard_->KeyRelease(0, 15); break; // Space
+            }
+        }
+        if (KeybMode == 1)
+        {
+            bool TextKey = true;
+            switch ((int)event->nativeVirtualKey())
+            {
+                case 38: // Strzalka w gore
+                    LoadKeyStream(false, true, true, 1, (uchar*)"~U", 1);
+                    TextKey = false;
+                    break;
+                case 40: // Strzalka w dol
+                    LoadKeyStream(false, true, true, 1, (uchar*)"~D", 1);
+                    TextKey = false;
+                    break;
+                case 37: // Strzalka w lewo
+                    LoadKeyStream(false, true, true, 1, (uchar*)"~L", 1);
+                    TextKey = false;
+                    break;
+                case 39: // Strzalka w prawo
+                    LoadKeyStream(false, true, true, 1, (uchar*)"~R", 1);
+                    TextKey = false;
+                    break;
+                case 32: // Spacja
+                    LoadKeyStream(false, true, true, 1, (uchar*)" ", 1);
+                    TextKey = false;
+                    break;
+                case 13: // Enter
+                    LoadKeyStream(false, true, true, 1, (uchar*)"\n", 1);
+                    TextKey = false;
+                    break;
+                case 16: // Shift
+                    TextKey = false;
+                    break; // Shift
+            }
+            if (TextKey)
+            {
+                string KeyChar = Eden::ToStr(event->text());
+                if (KeyChar.size() > 0)
+                {
+                    if ((KeyChar[0] >= 33) && ((KeyChar[0] <= 126)))
+                    {
+                        //cout << "RELEASE " << (int)KeyChar[0] << endl;
+                        LoadKeyStream(false, true, true, 1, (uchar*)KeyChar.c_str(), 1);
+                    }
+                }
+            }
+            //cout << "RELEASE " << Eden::ToStr((int)event->nativeVirtualKey()) << "  " << Eden::ToStr(event->text()) << endl;
+        }
+    }
+}

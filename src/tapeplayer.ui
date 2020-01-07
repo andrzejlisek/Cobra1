@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TapePlayer</class>
+ <widget class="QDialog" name="TapePlayer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>439</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Magnetofon i pamięć</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="PanelTapePlayer">
+     <property name="title">
+      <string>Magnetofon</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="FileNew">
+          <property name="text">
+           <string>Nowy plik</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="FileLoad">
+          <property name="text">
+           <string>Wczytaj plik</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="FileSave">
+          <property name="text">
+           <string>Zapisz plik</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="TapePlayerState">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="TapePosition">
+          <property name="maximum">
+           <number>199</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="textVisible">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="PlayerRecord">
+          <property name="text">
+           <string>(  )</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PlayerStart">
+          <property name="text">
+           <string>|&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PlayerStop">
+          <property name="text">
+           <string>[  ]</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PlayerForward">
+          <property name="text">
+           <string>&gt;&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PlayerRewind">
+          <property name="text">
+           <string>&lt;&lt;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="SetSampleT">
+          <property name="text">
+           <string>74</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="SetThresholdL">
+          <property name="text">
+           <string>WAV - Próg rozpczęcia impulsu</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="SetPulseTimeL">
+          <property name="text">
+           <string>Odczyt - Czas impulsu długiego (próbki)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="SetSampleL">
+          <property name="text">
+           <string>Odczyt/Zapis - Czas trwania próbki nagrania (cykle)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="SetThreshold0L">
+          <property name="text">
+           <string>WAV - Próg zakończenia impulsu</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="SetThresholdT">
+          <property name="text">
+           <string>7000</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="SetThreshold0T">
+          <property name="text">
+           <string>5000</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="SetPulseTimeT">
+          <property name="text">
+           <string>16</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="SetSavePulseLengthL">
+          <property name="text">
+           <string>Zapis - Czas trwania impulsu (próbki)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="SetSaveInvertTimeL">
+          <property name="text">
+           <string>Zapis - Czas do impulsu przeciwnego (próbki)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="SetSavePulseLengthT">
+          <property name="text">
+           <string>4</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLineEdit" name="SetSaveInvertTimeT">
+          <property name="text">
+           <string>9</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="PanelMemory">
+     <property name="title">
+      <string>Pamięć</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="MemRomL">
+        <property name="text">
+         <string>Obraz pamięci ROM:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="MemRomT">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="MemRomB">
+        <property name="text">
+         <string>Wybierz plik</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="MemLstL">
+        <property name="text">
+         <string>Lista banków ROM:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="MemLstT">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="MemLstB">
+        <property name="text">
+         <string>Wybierz plik</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="MemChrL">
+        <property name="text">
+         <string>Obraz generatora znaków:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="MemChrT">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="MemChrB">
+        <property name="text">
+         <string>Wybierz plik</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="MemRamL">
+        <property name="text">
+         <string>Wstępna zawartość RAM:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="MemRamT">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="MemRamB">
+        <property name="text">
+         <string>Wybierz plik</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
