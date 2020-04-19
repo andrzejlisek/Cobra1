@@ -18,9 +18,9 @@ void ScreenKeyb::keyPressEvent(QKeyEvent* event)
     QDialog::keyPressEvent(event);
     if (!event->isAutoRepeat())
     {
-        switch ((int)event->nativeVirtualKey())
+        switch ((int)event->key())
         {
-            case 27: // Esc
+            case Qt::Key_Escape: // Esc
             {
                 this->hide();
                 break;

@@ -1,0 +1,6 @@
+Aby skompilować ten projekt pod Linuxem należy:
+1. Jeśli nie jest to instalacja QT dostarczona razem z dystrybucją, należy do
+   zmiennej PATH dodać narzędzia dla wybranej wersji QT.
+2. W katalogu z plikiem 'Cobra1.pro' uruchomić komendę:
+   qmake -makefile Cobra1.pro
+3. Wpisać komendę 'make'.

@@ -51,6 +51,8 @@ AppCore::AppCore()
     CpuMem_->LoadRom(AppDir, FileRom, FileLst, FileRam);
     Screen_->LoadRom(AppDir, FileChr);
     CpuMem_->Reset(1);
+
+    LastPath = ".";   // Domyslnie biezacy katalog
 }
 
 AppCore::~AppCore()
@@ -460,84 +462,84 @@ void AppCore::keyPressEvent(QKeyEvent *event)
     {
         if (KeybMode == 0)
         {
-            switch ((int)event->nativeVirtualKey())
+            switch ((int)event->key())
             {
-                case 49: Keyboard_->KeyPress__(0, 11); break; // 1
-                case 50: Keyboard_->KeyPress__(1, 11); break; // 2
-                case 51: Keyboard_->KeyPress__(2, 11); break; // 3
-                case 52: Keyboard_->KeyPress__(3, 11); break; // 4
-                case 53: Keyboard_->KeyPress__(4, 11); break; // 5
-                case 54: Keyboard_->KeyPress__(4, 12); break; // 6
-                case 55: Keyboard_->KeyPress__(3, 12); break; // 7
-                case 56: Keyboard_->KeyPress__(2, 12); break; // 8
-                case 57: Keyboard_->KeyPress__(1, 12); break; // 9
-                case 48: Keyboard_->KeyPress__(0, 12); break; // 0
+                case Qt::Key_1: Keyboard_->KeyPress__(0, 11); break; // 1
+                case Qt::Key_2: Keyboard_->KeyPress__(1, 11); break; // 2
+                case Qt::Key_3: Keyboard_->KeyPress__(2, 11); break; // 3
+                case Qt::Key_4: Keyboard_->KeyPress__(3, 11); break; // 4
+                case Qt::Key_5: Keyboard_->KeyPress__(4, 11); break; // 5
+                case Qt::Key_6: Keyboard_->KeyPress__(4, 12); break; // 6
+                case Qt::Key_7: Keyboard_->KeyPress__(3, 12); break; // 7
+                case Qt::Key_8: Keyboard_->KeyPress__(2, 12); break; // 8
+                case Qt::Key_9: Keyboard_->KeyPress__(1, 12); break; // 9
+                case Qt::Key_0: Keyboard_->KeyPress__(0, 12); break; // 0
 
-                case 81: Keyboard_->KeyPress__(0, 10); break; // Q
-                case 87: Keyboard_->KeyPress__(1, 10); break; // W
-                case 69: Keyboard_->KeyPress__(2, 10); break; // E
-                case 82: Keyboard_->KeyPress__(3, 10); break; // R
-                case 84: Keyboard_->KeyPress__(4, 10); break; // T
-                case 89: Keyboard_->KeyPress__(4, 13); break; // Y
-                case 85: Keyboard_->KeyPress__(3, 13); break; // U
-                case 73: Keyboard_->KeyPress__(2, 13); break; // I
-                case 79: Keyboard_->KeyPress__(1, 13); break; // O
-                case 80: Keyboard_->KeyPress__(0, 13); break; // P
+                case Qt::Key_Q: Keyboard_->KeyPress__(0, 10); break; // Q
+                case Qt::Key_W: Keyboard_->KeyPress__(1, 10); break; // W
+                case Qt::Key_E: Keyboard_->KeyPress__(2, 10); break; // E
+                case Qt::Key_R: Keyboard_->KeyPress__(3, 10); break; // R
+                case Qt::Key_T: Keyboard_->KeyPress__(4, 10); break; // T
+                case Qt::Key_Y: Keyboard_->KeyPress__(4, 13); break; // Y
+                case Qt::Key_U: Keyboard_->KeyPress__(3, 13); break; // U
+                case Qt::Key_I: Keyboard_->KeyPress__(2, 13); break; // I
+                case Qt::Key_O: Keyboard_->KeyPress__(1, 13); break; // O
+                case Qt::Key_P: Keyboard_->KeyPress__(0, 13); break; // P
 
-                case 65: Keyboard_->KeyPress__(0,  9); break; // A
-                case 83: Keyboard_->KeyPress__(1,  9); break; // S
-                case 68: Keyboard_->KeyPress__(2,  9); break; // D
-                case 70: Keyboard_->KeyPress__(3,  9); break; // F
-                case 71: Keyboard_->KeyPress__(4,  9); break; // G
-                case 72: Keyboard_->KeyPress__(4, 14); break; // H
-                case 74: Keyboard_->KeyPress__(3, 14); break; // J
-                case 75: Keyboard_->KeyPress__(2, 14); break; // K
-                case 76: Keyboard_->KeyPress__(1, 14); break; // L
-                case 13: Keyboard_->KeyPress__(0, 14); break; // Enter
+                case Qt::Key_A: Keyboard_->KeyPress__(0,  9); break; // A
+                case Qt::Key_S: Keyboard_->KeyPress__(1,  9); break; // S
+                case Qt::Key_D: Keyboard_->KeyPress__(2,  9); break; // D
+                case Qt::Key_F: Keyboard_->KeyPress__(3,  9); break; // F
+                case Qt::Key_G: Keyboard_->KeyPress__(4,  9); break; // G
+                case Qt::Key_H: Keyboard_->KeyPress__(4, 14); break; // H
+                case Qt::Key_J: Keyboard_->KeyPress__(3, 14); break; // J
+                case Qt::Key_K: Keyboard_->KeyPress__(2, 14); break; // K
+                case Qt::Key_L: Keyboard_->KeyPress__(1, 14); break; // L
+                case Qt::Key_Return: Keyboard_->KeyPress__(0, 14); break; // Enter
 
-                case 16: Keyboard_->KeyPress__(0,  8); break; // Shift
-                case 90: Keyboard_->KeyPress__(1,  8); break; // Z
-                case 88: Keyboard_->KeyPress__(2,  8); break; // X
-                case 67: Keyboard_->KeyPress__(3,  8); break; // C
-                case 86: Keyboard_->KeyPress__(4,  8); break; // V
-                case 66: Keyboard_->KeyPress__(4, 15); break; // B
-                case 78: Keyboard_->KeyPress__(3, 15); break; // N
-                case 77: Keyboard_->KeyPress__(2, 15); break; // M
-                case 188:Keyboard_->KeyPress__(1, 15); break; // ,
-                case 190:Keyboard_->KeyPress__(1, 15); break; // .
-                case 32: Keyboard_->KeyPress__(0, 15); break; // Space
+                case Qt::Key_Shift: Keyboard_->KeyPress__(0,  8); break; // Shift
+                case Qt::Key_Z: Keyboard_->KeyPress__(1,  8); break; // Z
+                case Qt::Key_X: Keyboard_->KeyPress__(2,  8); break; // X
+                case Qt::Key_C: Keyboard_->KeyPress__(3,  8); break; // C
+                case Qt::Key_V: Keyboard_->KeyPress__(4,  8); break; // V
+                case Qt::Key_B: Keyboard_->KeyPress__(4, 15); break; // B
+                case Qt::Key_N: Keyboard_->KeyPress__(3, 15); break; // N
+                case Qt::Key_M: Keyboard_->KeyPress__(2, 15); break; // M
+                case Qt::Key_Comma:Keyboard_->KeyPress__(1, 15); break; // ,
+                case Qt::Key_Period:Keyboard_->KeyPress__(1, 15); break; // .
+                case Qt::Key_Space: Keyboard_->KeyPress__(0, 15); break; // Space
             }
         }
         if (KeybMode == 1)
         {
             bool TextKey = true;
-            switch ((int)event->nativeVirtualKey())
+            switch ((int)event->key())
             {
-                case 38: // Strzalka w gore
+                case Qt::Key_Up: // Strzalka w gore
                     LoadKeyStream(true, false, true, 1, (uchar*)"~U", 1);
                     TextKey = false;
                     break;
-                case 40: // Strzalka w dol
+                case Qt::Key_Down: // Strzalka w dol
                     LoadKeyStream(true, false, true, 1, (uchar*)"~D", 1);
                     TextKey = false;
                     break;
-                case 37: // Strzalka w lewo
+                case Qt::Key_Left: // Strzalka w lewo
                     LoadKeyStream(true, false, true, 1, (uchar*)"~L", 1);
                     TextKey = false;
                     break;
-                case 39: // Strzalka w prawo
+                case Qt::Key_Right: // Strzalka w prawo
                     LoadKeyStream(true, false, true, 1, (uchar*)"~R", 1);
                     TextKey = false;
                     break;
-                case 32: // Spacja
+                case Qt::Key_Space: // Spacja
                     LoadKeyStream(true, false, true, 1, (uchar*)" ", 1);
                     TextKey = false;
                     break;
-                case 13: // Enter
+                case Qt::Key_Return: // Enter
                     LoadKeyStream(true, false, true, 1, (uchar*)"\n", 1);
                     TextKey = false;
                     break;
-                case 16: // Shift
+                case Qt::Key_Shift: // Shift
                     TextKey = false;
                     break;
             }
@@ -556,7 +558,7 @@ void AppCore::keyPressEvent(QKeyEvent *event)
             //switch (event->text())
             //{
             //}
-            //cout << "PRESS " << Eden::ToStr((int)event->nativeVirtualKey()) << "  " << Eden::ToStr(event->text()) << endl;
+            //cout << "PRESS " << Eden::ToStr((int)event->key()) << "  " << Eden::ToStr(event->text()) << endl;
         }
     }
 }
@@ -567,84 +569,84 @@ void AppCore::keyReleaseEvent(QKeyEvent *event)
     {
         if (KeybMode == 0)
         {
-            switch ((int)event->nativeVirtualKey())
+            switch ((int)event->key())
             {
-                case 49: Keyboard_->KeyRelease(0, 11); break; // 1
-                case 50: Keyboard_->KeyRelease(1, 11); break; // 2
-                case 51: Keyboard_->KeyRelease(2, 11); break; // 3
-                case 52: Keyboard_->KeyRelease(3, 11); break; // 4
-                case 53: Keyboard_->KeyRelease(4, 11); break; // 5
-                case 54: Keyboard_->KeyRelease(4, 12); break; // 6
-                case 55: Keyboard_->KeyRelease(3, 12); break; // 7
-                case 56: Keyboard_->KeyRelease(2, 12); break; // 8
-                case 57: Keyboard_->KeyRelease(1, 12); break; // 9
-                case 48: Keyboard_->KeyRelease(0, 12); break; // 0
+                case Qt::Key_1: Keyboard_->KeyRelease(0, 11); break; // 1
+                case Qt::Key_2: Keyboard_->KeyRelease(1, 11); break; // 2
+                case Qt::Key_3: Keyboard_->KeyRelease(2, 11); break; // 3
+                case Qt::Key_4: Keyboard_->KeyRelease(3, 11); break; // 4
+                case Qt::Key_5: Keyboard_->KeyRelease(4, 11); break; // 5
+                case Qt::Key_6: Keyboard_->KeyRelease(4, 12); break; // 6
+                case Qt::Key_7: Keyboard_->KeyRelease(3, 12); break; // 7
+                case Qt::Key_8: Keyboard_->KeyRelease(2, 12); break; // 8
+                case Qt::Key_9: Keyboard_->KeyRelease(1, 12); break; // 9
+                case Qt::Key_0: Keyboard_->KeyRelease(0, 12); break; // 0
 
-                case 81: Keyboard_->KeyRelease(0, 10); break; // Q
-                case 87: Keyboard_->KeyRelease(1, 10); break; // W
-                case 69: Keyboard_->KeyRelease(2, 10); break; // E
-                case 82: Keyboard_->KeyRelease(3, 10); break; // R
-                case 84: Keyboard_->KeyRelease(4, 10); break; // T
-                case 89: Keyboard_->KeyRelease(4, 13); break; // Y
-                case 85: Keyboard_->KeyRelease(3, 13); break; // U
-                case 73: Keyboard_->KeyRelease(2, 13); break; // I
-                case 79: Keyboard_->KeyRelease(1, 13); break; // O
-                case 80: Keyboard_->KeyRelease(0, 13); break; // P
+                case Qt::Key_Q: Keyboard_->KeyRelease(0, 10); break; // Q
+                case Qt::Key_W: Keyboard_->KeyRelease(1, 10); break; // W
+                case Qt::Key_E: Keyboard_->KeyRelease(2, 10); break; // E
+                case Qt::Key_R: Keyboard_->KeyRelease(3, 10); break; // R
+                case Qt::Key_T: Keyboard_->KeyRelease(4, 10); break; // T
+                case Qt::Key_Y: Keyboard_->KeyRelease(4, 13); break; // Y
+                case Qt::Key_U: Keyboard_->KeyRelease(3, 13); break; // U
+                case Qt::Key_I: Keyboard_->KeyRelease(2, 13); break; // I
+                case Qt::Key_O: Keyboard_->KeyRelease(1, 13); break; // O
+                case Qt::Key_P: Keyboard_->KeyRelease(0, 13); break; // P
 
-                case 65: Keyboard_->KeyRelease(0,  9); break; // A
-                case 83: Keyboard_->KeyRelease(1,  9); break; // S
-                case 68: Keyboard_->KeyRelease(2,  9); break; // D
-                case 70: Keyboard_->KeyRelease(3,  9); break; // F
-                case 71: Keyboard_->KeyRelease(4,  9); break; // G
-                case 72: Keyboard_->KeyRelease(4, 14); break; // H
-                case 74: Keyboard_->KeyRelease(3, 14); break; // J
-                case 75: Keyboard_->KeyRelease(2, 14); break; // K
-                case 76: Keyboard_->KeyRelease(1, 14); break; // L
-                case 13: Keyboard_->KeyRelease(0, 14); break; // Enter
+                case Qt::Key_A: Keyboard_->KeyRelease(0,  9); break; // A
+                case Qt::Key_S: Keyboard_->KeyRelease(1,  9); break; // S
+                case Qt::Key_D: Keyboard_->KeyRelease(2,  9); break; // D
+                case Qt::Key_F: Keyboard_->KeyRelease(3,  9); break; // F
+                case Qt::Key_G: Keyboard_->KeyRelease(4,  9); break; // G
+                case Qt::Key_H: Keyboard_->KeyRelease(4, 14); break; // H
+                case Qt::Key_J: Keyboard_->KeyRelease(3, 14); break; // J
+                case Qt::Key_K: Keyboard_->KeyRelease(2, 14); break; // K
+                case Qt::Key_L: Keyboard_->KeyRelease(1, 14); break; // L
+                case Qt::Key_Return: Keyboard_->KeyRelease(0, 14); break; // Enter
 
-                case 16: Keyboard_->KeyRelease(0,  8); break; // Shift
-                case 90: Keyboard_->KeyRelease(1,  8); break; // Z
-                case 88: Keyboard_->KeyRelease(2,  8); break; // X
-                case 67: Keyboard_->KeyRelease(3,  8); break; // C
-                case 86: Keyboard_->KeyRelease(4,  8); break; // V
-                case 66: Keyboard_->KeyRelease(4, 15); break; // B
-                case 78: Keyboard_->KeyRelease(3, 15); break; // N
-                case 77: Keyboard_->KeyRelease(2, 15); break; // M
-                case 188:Keyboard_->KeyRelease(1, 15); break; // ,
-                case 190:Keyboard_->KeyRelease(1, 15); break; // .
-                case 32: Keyboard_->KeyRelease(0, 15); break; // Space
+                case Qt::Key_Shift: Keyboard_->KeyRelease(0,  8); break; // Shift
+                case Qt::Key_Z: Keyboard_->KeyRelease(1,  8); break; // Z
+                case Qt::Key_X: Keyboard_->KeyRelease(2,  8); break; // X
+                case Qt::Key_C: Keyboard_->KeyRelease(3,  8); break; // C
+                case Qt::Key_V: Keyboard_->KeyRelease(4,  8); break; // V
+                case Qt::Key_B: Keyboard_->KeyRelease(4, 15); break; // B
+                case Qt::Key_N: Keyboard_->KeyRelease(3, 15); break; // N
+                case Qt::Key_M: Keyboard_->KeyRelease(2, 15); break; // M
+                case Qt::Key_Comma:Keyboard_->KeyRelease(1, 15); break; // ,
+                case Qt::Key_Period:Keyboard_->KeyRelease(1, 15); break; // .
+                case Qt::Key_Space: Keyboard_->KeyRelease(0, 15); break; // Space
             }
         }
         if (KeybMode == 1)
         {
             bool TextKey = true;
-            switch ((int)event->nativeVirtualKey())
+            switch ((int)event->key())
             {
-                case 38: // Strzalka w gore
+                case Qt::Key_Up: // Strzalka w gore
                     LoadKeyStream(false, true, true, 1, (uchar*)"~U", 1);
                     TextKey = false;
                     break;
-                case 40: // Strzalka w dol
+                case Qt::Key_Down: // Strzalka w dol
                     LoadKeyStream(false, true, true, 1, (uchar*)"~D", 1);
                     TextKey = false;
                     break;
-                case 37: // Strzalka w lewo
+                case Qt::Key_Left: // Strzalka w lewo
                     LoadKeyStream(false, true, true, 1, (uchar*)"~L", 1);
                     TextKey = false;
                     break;
-                case 39: // Strzalka w prawo
+                case Qt::Key_Right: // Strzalka w prawo
                     LoadKeyStream(false, true, true, 1, (uchar*)"~R", 1);
                     TextKey = false;
                     break;
-                case 32: // Spacja
+                case Qt::Key_Space: // Spacja
                     LoadKeyStream(false, true, true, 1, (uchar*)" ", 1);
                     TextKey = false;
                     break;
-                case 13: // Enter
+                case Qt::Key_Return: // Enter
                     LoadKeyStream(false, true, true, 1, (uchar*)"\n", 1);
                     TextKey = false;
                     break;
-                case 16: // Shift
+                case Qt::Key_Shift: // Shift
                     TextKey = false;
                     break; // Shift
             }
@@ -660,7 +662,7 @@ void AppCore::keyReleaseEvent(QKeyEvent *event)
                     }
                 }
             }
-            //cout << "RELEASE " << Eden::ToStr((int)event->nativeVirtualKey()) << "  " << Eden::ToStr(event->text()) << endl;
+            //cout << "RELEASE " << Eden::ToStr((int)event->key()) << "  " << Eden::ToStr(event->text()) << endl;
         }
     }
 }

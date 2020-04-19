@@ -57,25 +57,25 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     if (!event->isAutoRepeat())
     {
         string AppDir = Eden::ApplicationDirectory();
-        switch ((int)event->nativeVirtualKey())
+        switch ((int)event->key())
         {
-            case 27: // Esc - klawiatura
+            case Qt::Key_Escape: // Esc - klawiatura
             {
                 ScreenKeyb_->hide();
                 ScreenKeyb_->show();
                 break;
             }
-            case 112: // F1 - pomoc
+            case Qt::Key_F1: // F1 - pomoc
             {
                 HelpSettings_->hide();
                 HelpSettings_->show();
                 break;
             }
-            case 113: // F2 - wczytaj
+            case Qt::Key_F2: // F2 - wczytaj
             {
                 QFileDialog Dlg;
                 Dlg.setAcceptMode(QFileDialog::AcceptOpen);
-                Dlg.setParent(this);
+                Dlg.setParent(this, Qt::Dialog);
                 Dlg.setDirectory(Core->LastPath);
                 Dlg.setNameFilter("Intel Hex (*.hex *.ihx);;Binary (*.bin *.rom);;Keystrokes (*.txt)");
                 if (Dlg.exec())
@@ -101,11 +101,11 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
                 }
                 break;
             }
-            case 114: // F3 - zapisz
+            case Qt::Key_F3: // F3 - zapisz
             {
                 QFileDialog Dlg;
                 Dlg.setAcceptMode(QFileDialog::AcceptSave);
-                Dlg.setParent(this);
+                Dlg.setParent(this, Qt::Dialog);
                 Dlg.setDirectory(Core->LastPath);
                 Dlg.setNameFilter("Intel Hex (*.hex *.ihx);;Binary (*.bin *.rom)");
                 if (Dlg.exec())
@@ -130,7 +130,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
                 }
                 break;
             }
-            case 115: // F4 - pelny ekran
+            case Qt::Key_F4: // F4 - pelny ekran
                 if (QMainWindow::isFullScreen())
                 {
                     QMainWindow::showNormal();
@@ -140,35 +140,35 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
                     QMainWindow::showFullScreen();
                 }
                 break;
-            case 116: // F5 - Start
+            case Qt::Key_F5: // F5 - Start
                 setWindowTitle("Cobra 1 (pracuje)");
                 SoundStart();
                 Core->CpuMem_->ProgStart(0);
                 break;
-            case 117: // F6 - Stop
+            case Qt::Key_F6: // F6 - Stop
                 setWindowTitle("Cobra 1 (zatrzymany)");
                 Core->CpuMem_->ProgStop();
                 SoundStop();
                 break;
-            case 118: // F7 - Reset
+            case Qt::Key_F7: // F7 - Reset
                 Core->CpuMem_->Reset(0);
                 Core->Screen_->Redraw();
                 break;
-            case 119: // F8 - Zeruj
+            case Qt::Key_F8: // F8 - Zeruj
                 Core->CpuMem_->LoadRom(AppDir, Core->FileRom, Core->FileLst, Core->FileRam);
                 Core->Screen_->LoadRom(AppDir, Core->FileChr);
                 Core->CpuMem_->Reset(1);
                 Core->Screen_->Redraw();
                 break;
-            case 120: // F9 - Magnetofon
+            case Qt::Key_F9: // F9 - Magnetofon
                 TapePlayer_->hide();
                 TapePlayer_->show();
                 break;
-            case 122: // F11 - Jeden krok
+            case Qt::Key_F11: // F11 - Jeden krok
                 Core->CpuMem_->ProgStart(1);
                 break;
         }
-        //cout << "PRESS " << Eden::ToStr((int)event->nativeVirtualKey()) << endl;
+        //cout << "PRESS " << Eden::ToStr((int)event->key()) << endl;
     }
 
     Core->keyPressEvent(event);
