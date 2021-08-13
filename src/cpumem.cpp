@@ -2123,6 +2123,13 @@ void CpuMem::ProgramWork(bool OneStep)
                         Data2I = MemGet(Reg_PC);
                         Reg_PC++;
                         Reg_Idx = MemGet(Data2I, Data1I);
+                        Data1I++;
+                        if (Data1I == 256)
+                        {
+                            Data2I++;
+                            Data1I = 0;
+                        }
+                        Reg_Idx = Reg_Idx + (((ushort)MemGet(Data2I, Data1I)) << 8);
                         CpuCyclePost(4, 4, 3, 3, 3, 3);
                         break;
                     case 0xF9: // LD SP, I_
