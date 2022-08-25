@@ -25,6 +25,7 @@ public:
 
     bool ScreenNegative;
     bool ScreenColor;
+    bool ScreenSwap;
     bool Forced;
 
     uchar ColorR[16];
@@ -44,9 +45,10 @@ public:
     uchar * ScrRaw;
 
 private:
-    uchar Font[256][256][8][8];
+    uchar Font[257][256][8][8];
     uchar Scr[32][24];
     uchar Clr[32][24];
+    uchar FontCust[256][8];
 };
 
 #endif // SCREEN_H

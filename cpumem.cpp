@@ -3963,6 +3963,12 @@ void CpuMem::DoOUT(uchar AddrH, uchar AddrL, uchar &Reg)
     {
         //cout << "Font " << Eden::IntToHex8(Reg) << endl;
         FontNo = Reg;
+
+        // Jezeli liczba jest co najmniej 128, to nalezy uzyc czcionki z pamieci RAM
+        if (Reg >= 128)
+        {
+            FontNo = 256;
+        }
     }
 
     // Zmiana banku pamieci

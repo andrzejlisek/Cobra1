@@ -98,3 +98,10 @@ void HelpSettings::on_ScreenColors_toggled(bool checked)
     Core->Screen_->Redraw();
     Core->Screen_->Refresh();
 }
+
+void HelpSettings::on_ScreenSwap_toggled(bool checked)
+{
+    Core->Screen_->ScreenSwap = checked;
+    Core->Screen_->Redraw();
+    Core->Screen_->Refresh();
+}

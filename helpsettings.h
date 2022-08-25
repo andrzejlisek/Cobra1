@@ -46,6 +46,8 @@ private slots:
 
     void on_ScreenColors_toggled(bool checked);
 
+    void on_ScreenSwap_toggled(bool checked);
+
 private:
     Ui::HelpSettings *ui;
 };

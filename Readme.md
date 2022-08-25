@@ -45,7 +45,8 @@ Dostępne są następujące opcje:
 
 
 * **Negatyw** \- Wyświetlanie czarnych znaków na białym tle zamiast białych znaków na czarnym tle \(odwrócone kolory\)\.
-* **Kolory** \- Uzywanie kolorów według danych zapisanych w obszarze od FC00 do FEFF\. Ta funkcjonalność nie jest dostepna w oryginalnym komputerze\.
+* **Kolory** \- Używanie kolorów według danych zapisanych w obszarze od FC00 do FEFF\. Ta funkcjonalność nie jest dostepna w oryginalnym komputerze\.
+* **Zamiana kolorów** \- Zamiana koloru tła z kolorem znaku\.
 * **Głośność sygnalizatora** \- Głośność dźwięku sygnalizatora \(dźwięk odtwarzany z pliku **sound\.wav**\), zbyt duża wartość głośności może spowodować przesterowanie\.
 * **Głośność generatora** \- Głośność dźwięku generatora przebiegu prostokątnego, zbyt duża wartość głośności może spowodować przesterowanie\.
 * **Okres timera \(ms\)** \- Okres wewnętrznego timera sterującego odświeżaniem obrazu i buforowaniem dźwięku, wartość należy ustawić doświadczalnie\.

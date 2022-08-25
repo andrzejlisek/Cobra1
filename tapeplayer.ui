@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>439</width>
-    <height>480</height>
+    <width>468</width>
+    <height>511</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -300,6 +300,30 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>FileNew</tabstop>
+  <tabstop>FileLoad</tabstop>
+  <tabstop>FileSave</tabstop>
+  <tabstop>PlayerRecord</tabstop>
+  <tabstop>PlayerStart</tabstop>
+  <tabstop>PlayerStop</tabstop>
+  <tabstop>PlayerForward</tabstop>
+  <tabstop>PlayerRewind</tabstop>
+  <tabstop>SetThresholdT</tabstop>
+  <tabstop>SetThreshold0T</tabstop>
+  <tabstop>SetSampleT</tabstop>
+  <tabstop>SetPulseTimeT</tabstop>
+  <tabstop>SetSavePulseLengthT</tabstop>
+  <tabstop>SetSaveInvertTimeT</tabstop>
+  <tabstop>MemRomT</tabstop>
+  <tabstop>MemRomB</tabstop>
+  <tabstop>MemLstT</tabstop>
+  <tabstop>MemLstB</tabstop>
+  <tabstop>MemChrT</tabstop>
+  <tabstop>MemChrB</tabstop>
+  <tabstop>MemRamT</tabstop>
+  <tabstop>MemRamB</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

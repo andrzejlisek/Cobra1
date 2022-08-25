@@ -1087,6 +1087,17 @@ K</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>KeybSelect</tabstop>
+  <tabstop>SendSpeed</tabstop>
+  <tabstop>LinePause</tabstop>
+  <tabstop>SendText</tabstop>
+  <tabstop>SendClear</tabstop>
+  <tabstop>SendStart</tabstop>
+  <tabstop>ReceivePrinter</tabstop>
+  <tabstop>ReceiveText</tabstop>
+  <tabstop>ReceiveClear</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -47,6 +47,84 @@ void Screen::LoadRom(string AppDir, string RomFile)
         RomFile = AppDir + RomFile;
     }
 
+    // Wczytywanie domyslnych wzorow czcionek do celow kontrolnych
+    {
+        uchar S0, S1, S2, S3, S4, S5, S6;
+        for (int I = 0; I < 256; I++)
+        {
+            for (int J = 0; J < 257; J++)
+            {
+                for (int P = 0; P < 64; P++)
+                {
+                    Font[J][I][P >> 3][P & 3] = 0;
+                }
+
+                DigitBits(I >> 4, S0, S1, S2, S3, S4, S5, S6);
+                Font[J][I][0][1] = S0 | S5;
+                Font[J][I][0][2] = S5;
+                Font[J][I][0][3] = S4 | S5 | S6;
+                Font[J][I][0][4] = S4;
+                Font[J][I][0][5] = S3 | S4;
+                Font[J][I][1][1] = S0;
+                Font[J][I][1][3] = S6;
+                Font[J][I][1][5] = S3;
+                Font[J][I][2][1] = S0 | S1;
+                Font[J][I][2][2] = S1;
+                Font[J][I][2][3] = S1 | S2 | S6;
+                Font[J][I][2][4] = S2;
+                Font[J][I][2][5] = S2 | S3;
+
+                DigitBits(I & 15, S0, S1, S2, S3, S4, S5, S6);
+                Font[J][I][4][1] = S0 | S5;
+                Font[J][I][4][2] = S5;
+                Font[J][I][4][3] = S4 | S5 | S6;
+                Font[J][I][4][4] = S4;
+                Font[J][I][4][5] = S3 | S4;
+                Font[J][I][5][1] = S0;
+                Font[J][I][5][3] = S6;
+                Font[J][I][5][5] = S3;
+                Font[J][I][6][1] = S0 | S1;
+                Font[J][I][6][2] = S1;
+                Font[J][I][6][3] = S1 | S2 | S6;
+                Font[J][I][6][4] = S2;
+                Font[J][I][6][5] = S2 | S3;
+
+                Font[J][I][0][7] = 1;
+                Font[J][I][1][7] = 1;
+                Font[J][I][2][7] = 1;
+                Font[J][I][3][7] = 1;
+                Font[J][I][4][7] = 1;
+                Font[J][I][5][7] = 1;
+                Font[J][I][6][7] = 1;
+            }
+        }
+    }
+
+    for (int I = 0; I < 256; I++)
+    {
+        for (int II = 0; II < 8; II++)
+        {
+            //uchar B7 = Font[256][I][0][II];
+            //uchar B6 = Font[256][I][1][II];
+            //uchar B5 = Font[256][I][2][II];
+            //uchar B4 = Font[256][I][3][II];
+            //uchar B3 = Font[256][I][4][II];
+            //uchar B2 = Font[256][I][5][II];
+            //uchar B1 = Font[256][I][6][II];
+            //uchar B0 = Font[256][I][7][II];
+            //FontCust[I][II] = (B7 << 7) + (B6 << 6) + (B5 << 5) + (B4 << 4) + (B3 << 3) + (B2 << 2) + (B1 << 1) + (B0);
+            FontCust[I][II] = 0;
+            Font[256][I][0][II] = 0;
+            Font[256][I][1][II] = 0;
+            Font[256][I][2][II] = 0;
+            Font[256][I][3][II] = 0;
+            Font[256][I][4][II] = 0;
+            Font[256][I][5][II] = 0;
+            Font[256][I][6][II] = 0;
+            Font[256][I][7][II] = 0;
+        }
+    }
+
     // Wczytywanie wzorow czcionek
     if (Eden::FileExists(RomFile))
     {
@@ -93,58 +171,6 @@ void Screen::LoadRom(string AppDir, string RomFile)
                 }
             }
             delete[] RomBuf;
-        }
-    }
-    else
-    {
-        uchar S0, S1, S2, S3, S4, S5, S6;
-        for (int I = 0; I < 256; I++)
-        {
-            for (int J = 0; J < 256; J++)
-            {
-                for (int P = 0; P < 64; P++)
-                {
-                    Font[J][I][P >> 3][P & 3] = 0;
-                }
-
-                DigitBits(I >> 4, S0, S1, S2, S3, S4, S5, S6);
-                Font[J][I][0][1] = S0 | S5;
-                Font[J][I][0][2] = S5;
-                Font[J][I][0][3] = S4 | S5 | S6;
-                Font[J][I][0][4] = S4;
-                Font[J][I][0][5] = S3 | S4;
-                Font[J][I][1][1] = S0;
-                Font[J][I][1][3] = S6;
-                Font[J][I][1][5] = S3;
-                Font[J][I][2][1] = S0 | S1;
-                Font[J][I][2][2] = S1;
-                Font[J][I][2][3] = S1 | S2 | S6;
-                Font[J][I][2][4] = S2;
-                Font[J][I][2][5] = S2 | S3;
-
-                DigitBits(I & 15, S0, S1, S2, S3, S4, S5, S6);
-                Font[J][I][4][1] = S0 | S5;
-                Font[J][I][4][2] = S5;
-                Font[J][I][4][3] = S4 | S5 | S6;
-                Font[J][I][4][4] = S4;
-                Font[J][I][4][5] = S3 | S4;
-                Font[J][I][5][1] = S0;
-                Font[J][I][5][3] = S6;
-                Font[J][I][5][5] = S3;
-                Font[J][I][6][1] = S0 | S1;
-                Font[J][I][6][2] = S1;
-                Font[J][I][6][3] = S1 | S2 | S6;
-                Font[J][I][6][4] = S2;
-                Font[J][I][6][5] = S2 | S3;
-
-                Font[J][I][0][7] = 1;
-                Font[J][I][1][7] = 1;
-                Font[J][I][2][7] = 1;
-                Font[J][I][3][7] = 1;
-                Font[J][I][4][7] = 1;
-                Font[J][I][5][7] = 1;
-                Font[J][I][6][7] = 1;
-            }
         }
     }
 }
@@ -214,26 +240,54 @@ void Screen::DrawChar(int X, int Y, int N, int Colors)
         for (XX = 0; XX < 8; XX++)
         {
             int C;
-            if (Font[FontNo][N][XX][YY])
+            if (ScreenSwap)
             {
-                if (ScreenColor)
+                if (Font[FontNo][N][XX][YY])
                 {
-                    C = Colors & 15;
+                    if (ScreenColor)
+                    {
+                        C = Colors >> 4;
+                    }
+                    else
+                    {
+                        C = 0;
+                    }
                 }
                 else
                 {
-                    C = 15;
+                    if (ScreenColor)
+                    {
+                        C = Colors & 15;
+                    }
+                    else
+                    {
+                        C = 15;
+                    }
                 }
             }
             else
             {
-                if (ScreenColor)
+                if (Font[FontNo][N][XX][YY])
                 {
-                    C = Colors >> 4;
+                    if (ScreenColor)
+                    {
+                        C = Colors & 15;
+                    }
+                    else
+                    {
+                        C = 15;
+                    }
                 }
                 else
                 {
-                    C = 0;
+                    if (ScreenColor)
+                    {
+                        C = Colors >> 4;
+                    }
+                    else
+                    {
+                        C = 0;
+                    }
                 }
             }
 
@@ -267,11 +321,36 @@ bool Screen::Refresh()
     int CharY;
     int CharX;
     CpuMem_->ExecMutex.lock();
+    bool FontChanged = false;
+    if (FontNo == 256)
+    {
+        for (int I = 0; I < 256; I++)
+        {
+            for (int II = 0; II < 8; II++)
+            {
+                int Ptr = 0xF000 + (I * 8) + II;
+                if (FontCust[I][II] != CpuMem_->Mem[Ptr])
+                {
+                    FontChanged = true;
+                    FontCust[I][II] = CpuMem_->Mem[Ptr];
+
+                    Font[256][I][0][II] = (uchar)(FontCust[I][II] & b10000000);
+                    Font[256][I][1][II] = (uchar)(FontCust[I][II] & b01000000);
+                    Font[256][I][2][II] = (uchar)(FontCust[I][II] & b00100000);
+                    Font[256][I][3][II] = (uchar)(FontCust[I][II] & b00010000);
+                    Font[256][I][4][II] = (uchar)(FontCust[I][II] & b00001000);
+                    Font[256][I][5][II] = (uchar)(FontCust[I][II] & b00000100);
+                    Font[256][I][6][II] = (uchar)(FontCust[I][II] & b00000010);
+                    Font[256][I][7][II] = (uchar)(FontCust[I][II] & b00000001);
+                }
+            }
+        }
+    }
     for (CharY = 0; CharY < 24; CharY++)
     {
         for (CharX = 0; CharX < 32; CharX++)
         {
-            if ((Scr[CharX][CharY] != CpuMem_->Mem[CharZ]) || (Clr[CharX][CharY] != CpuMem_->Mem[CharC]) || (FontNoX != FontNo))
+            if (FontChanged || (Scr[CharX][CharY] != CpuMem_->Mem[CharZ]) || (Clr[CharX][CharY] != CpuMem_->Mem[CharC]) || (FontNoX != FontNo))
             {
                 DrawChar(CharX, CharY, CpuMem_->Mem[CharZ], CpuMem_->Mem[CharC]);
                 Scr[CharX][CharY] = CpuMem_->Mem[CharZ];
