@@ -43,10 +43,12 @@ AppCore::AppCore()
 
     Screen_ = new Screen();
     Keyboard_ = new Keyboard();
+    AudioAY_ = new AudioAY();
     CpuMem_ = new CpuMem();
     Screen_->CpuMem_ = CpuMem_;
     CpuMem_->Keyboard_ = Keyboard_;
     CpuMem_->Tape_ = Tape_;
+    CpuMem_->AudioAY_ = AudioAY_;
 
     EdenClass::ConfigFile CF;
     CF.FileLoad(Eden::ApplicationDirectory() + "cobra1.cfg");
@@ -56,8 +58,10 @@ AppCore::AppCore()
     CF.ParamGet("CpuMem_Printer", CpuMem_->Printer);
     CF.ParamGet("Screen_ScreenNegative", Screen_->ScreenNegative);
     CF.ParamGet("Screen_ScreenColor", Screen_->ScreenColor);
+    CF.ParamGet("CpuMem_ScreenMemCommon", CpuMem_->ScreenMemCommon);
     CF.ParamGet("SoundVolumeBeep", SoundVolumeBeep);
     CF.ParamGet("SoundVolumeGen", SoundVolumeGen);
+    CF.ParamGet("SoundVolumeAY", SoundVolumeAY);
     CF.ParamGet("SoundTimerPeriod", SoundTimerPeriod);
     CF.ParamGet("SoundBufSize", SoundBufSize);
     CF.ParamGet("SoundChunkSize", SoundChunkSize);
@@ -77,6 +81,8 @@ AppCore::AppCore()
     CF.ParamGet("FileLst", FileLst);
     CF.ParamGet("FileChr", FileChr);
     CF.ParamGet("FileRam", FileRam);
+    CF.ParamGet("AudioAY_ChipClock", AudioAY_->ChipClock);
+    CF.ParamGet("CpuMem_InterruptPeriod", CpuMem_->InterruptPeriod);
 
     CpuMem_->LoadRom(AppDir, FileRom, FileLst, FileRam);
     Screen_->LoadRom(AppDir, FileChr);
@@ -104,8 +110,10 @@ void AppCore::SettingsSave()
     CF.ParamSet("CpuMem_Printer", CpuMem_->Printer);
     CF.ParamSet("Screen_ScreenNegative", Screen_->ScreenNegative);
     CF.ParamSet("Screen_ScreenColor", Screen_->ScreenColor);
+    CF.ParamSet("CpuMem_ScreenMemCommon", CpuMem_->ScreenMemCommon);
     CF.ParamSet("SoundVolumeBeep", SoundVolumeBeep);
     CF.ParamSet("SoundVolumeGen", SoundVolumeGen);
+    CF.ParamSet("SoundVolumeAY", SoundVolumeAY);
     CF.ParamSet("SoundTimerPeriod", SoundTimerPeriod);
     CF.ParamSet("SoundBufSize", SoundBufSize);
     CF.ParamSet("SoundChunkSize", SoundChunkSize);
@@ -125,6 +133,8 @@ void AppCore::SettingsSave()
     CF.ParamSet("FileLst", FileLst);
     CF.ParamSet("FileChr", FileChr);
     CF.ParamSet("FileRam", FileRam);
+    CF.ParamSet("AudioAY_ChipClock", AudioAY_->ChipClock);
+    CF.ParamSet("CpuMem_InterruptPeriod", CpuMem_->InterruptPeriod);
     CF.FileSave(Eden::ApplicationDirectory() + "cobra1.cfg");
 }
 
@@ -149,14 +159,16 @@ short AppCore::GetSample()
     switch (XX)
     {
         case 0:
-            SoundSample = 16000 * SoundVolumeGen;
+            SoundSample = 0;
             break;
         case 1:
-            SoundSample = 0;
+            SoundSample = 16000 * SoundVolumeGen;
+            break;
         case 2:
+            SoundSample = -16000 * SoundVolumeGen;
             break;
         case 3:
-            SoundSample = -16000 * SoundVolumeGen;
+            SoundSample = 0;
             break;
     }
 
@@ -166,6 +178,9 @@ short AppCore::GetSample()
         SoundSample += (X * SoundVolumeBeep);
         BeepSoundI++;
     }
+
+    SoundSample += AudioAY_->Sample() * SoundVolumeAY;
+
     return SoundSample >> 8;
 }
 

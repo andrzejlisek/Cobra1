@@ -133,6 +133,17 @@ void CpuMem::MemSet(ushort Addr, uchar Val)
     if ((MemAddr(Addr) < 0xC000) || (MemAddr(Addr) >= RomSize1[RomNo]))
     {
         Mem[MemAddr(Addr)] = Val;
+        if (ScreenMemCommon)
+        {
+            if ((Addr >= 0xF800) && (Addr <= 0xFBFF))
+            {
+                Mem[MemAddr(Addr + 0x0400)] = Val;
+            }
+            if ((Addr >= 0xFC00) && (Addr <= 0xFFFF))
+            {
+                Mem[MemAddr(Addr - 0x0400)] = Val;
+            }
+        }
     }
     /*else
     {
@@ -151,6 +162,17 @@ void CpuMem::MemSet(ushort AddrH, ushort AddrL, uchar Val)
     if ((AddrH < 0xC0) || (AddrH >= RomSize2[RomNo]))
     {
         Mem[MemAddr((AddrH << 8) + AddrL)] = Val;
+        if (ScreenMemCommon)
+        {
+            if ((AddrH >= 0xF8) && (AddrH <= 0xFB))
+            {
+                Mem[MemAddr((AddrH << 8) + AddrL + 0x0400)] = Val;
+            }
+            if ((AddrH >= 0xFC) && (AddrH <= 0xFF))
+            {
+                Mem[MemAddr((AddrH << 8) + AddrL - 0x0400)] = Val;
+            }
+        }
     }
     /*else
     {
@@ -251,7 +273,7 @@ void CpuMem::ProgramWork(bool OneStep)
         ExecMutex.lock();
 
         // Ilosc rozkazow na jedna iteracje petli wykonawczej
-        for (int PacketIteration = 1000; PacketIteration > 0; PacketIteration--)
+        for (int PacketIteration = 500; PacketIteration > 0; PacketIteration--)
         {
             // Sprawdzenie, czy jest to wykonanie jednego kroku
             if (OneStep)
@@ -3079,11 +3101,21 @@ void CpuMem::ProgramWork(bool OneStep)
 }
 
 ///
+/// \brief CpuMem::InterruptPeriodCalc - Obliczanie okresu przerwania w cyklach
+///
+void CpuMem::InterruptPeriodCalc()
+{
+    InterruptCpuPeriod = (3250 * InterruptPeriod);
+    InterruptCpuCounter = 0;
+}
+
+///
 /// \brief CpuMem::Reset - Resetowanie procesora
 ///
 void CpuMem::Reset(char Zero)
 {
     AddrOffset = 1;
+    InterruptPeriodCalc();
 
     // W przypadku zerowania nalezy wyczyscic pamiec RAM
     if (Zero)
@@ -3093,6 +3125,8 @@ void CpuMem::Reset(char Zero)
             //MemSet(I, 0);
             MemSet(I, rand());
         }
+
+        AudioAY_->Reset();
     }
 
     // Licznik rozkazow w Cobra 1 startuje od C000
@@ -3139,9 +3173,6 @@ void CpuMem::Reset(char Zero)
 
     InterruptINT = true;
     InterruptNMI = false;
-
-    // Licznik cykli do generowania przerwan NMI
-    CycleCounter = 0;
 }
 
 
@@ -3195,21 +3226,20 @@ void CpuMem::CpuCyclePre(int N1, int N2, int N3, int N4, int N5, int N6)
 
 void CpuMem::CpuCyclePost(int N1)
 {
-    /*if (NMITime > 0)
+    // Przerwanie z generatora zewnetrznego
+    if (InterruptCpuCounter > 0)
     {
-        // Przerwanie niemaskowalne nastepuje co 2 milisekundy, czyli przy 8000 cykli
-        CycleCounter += N1;
-
-        if (CycleCounter >= NMITime)
+        InterruptCpuPeriod++;
+        if (InterruptCpuPeriod >= InterruptCpuCounter)
         {
-            CycleCounter = CycleCounter - NMITime;
-            InterruptNMI = true;
+            InterruptINT = false;
+            InterruptCpuPeriod = 0;
+        }
+        else
+        {
+            InterruptINT = true;
         }
     }
-    else
-    {
-        InterruptNMI = false;
-    }*/
 
     TicksEstimated += N1;
 
@@ -3227,6 +3257,7 @@ void CpuMem::CpuCyclePost(int N1)
     {
         Tape_->Clock();
         Keyboard_->Clock();
+        AudioAY_->Clock();
     }
 }
 
@@ -3907,16 +3938,22 @@ void CpuMem::DoOUT(uchar AddrH, uchar AddrL, uchar &Reg)
     // Sterowanie dzwiekiem
     if (AddrL == 0xFE)
     {
+        //cout << "Dzwiek " << Eden::IntToHex8(Reg) << endl;
         SoundLevel1 = 1 - SoundLevel1;
-        /*if (Reg & b00000100)
-        {
-            SoundLevel = true;
-        }
-        else
-        {
-            SoundLevel = false;
-        }*/
     }
+
+    // AY-3-8910 - numer rejestr
+    if ((AddrH == 0xFF) && (AddrL == 0xFD))
+    {
+        AudioAY_->SetRegN(Reg);
+    }
+
+    // AY-3-8910 - wartosc rejestru
+    if ((AddrH == 0xBF) && (AddrL == 0xFD))
+    {
+        AudioAY_->SetRegV(Reg);
+    }
+
 
     //cout << "XXX  "  << Eden::IntToHex8(AddrH) << Eden::IntToHex8(AddrL) << "  " << Eden::IntToHex8(Reg) << endl;
 

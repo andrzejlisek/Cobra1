@@ -14,6 +14,7 @@
 #include <QSound>
 #include "audioplayer.h"
 #include "configfile.h"
+#include "audioay.h"
 
 
 using namespace std;
@@ -31,6 +32,7 @@ public:
     int SoundTimerPeriod = 20;
     int SoundVolumeBeep = 100;
     int SoundVolumeGen = 100;
+    int SoundVolumeAY = 100;
 
     int KeybMode = 0;
 
@@ -38,6 +40,7 @@ public:
     Keyboard * Keyboard_;
     CpuMem * CpuMem_;
     Tape * Tape_;
+    AudioAY * AudioAY_;
     AppCore();
     ~AppCore();
     void SettingsSave();

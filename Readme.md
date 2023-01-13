@@ -33,9 +33,14 @@ W przypadku trybu **PC**, tempo wykonywania poszczególnych czynności na emulow
 
 ## Dźwięk
 
-Wygenerowanie dźwięku polega na wysłaniu dowolnej wartości na adres XX18\. Istotna jest czynność wysyłania, wysyłany znak nie jest istotny\. Dźwięk ma charakter impulsowy, jest odtwarzany z pliku **sound\.wav**\.
+Emulator posiada cztery moduły generujące dźwięk:
 
-Dodatkowo, możliwe jest generowanie dźwięku o kształcie prostokątnym poprzez wysyłanie dowolnej wartości na adres XXFE\. Wysyłana wartość nie jest istotna, każda czynność wysłania zmienia stan przebiegu na przeciwny\. Wysyłanie wykonywane ze stałą częstotliwością powoduje wygenerowanie dźwięku o częstotliwości podstawowej równej połowie częstotliwości wysyłania\.
+
+* **Sygnalizator** \- wyzwolenie dźwięku polega na wysłaniu dowolnej wartości na adres XX18\. Istotna jest czynność wysyłania, wysyłana wartość nie ma znaczenia\. Dźwięk ma charakter impulsowy, jest odtwarzany z pliku **sound\.wav**\.
+* **Generator** \- zawiera dwa kanały generujące dźwięk o kształcie prostokątnym poprzez wysyłanie ze stałą częstotliwością odpowiednich wartości, co powoduje wygenerowanie dźwięku o częstotliwości podstawowej równej połowie częstotliwości wysyłania\. Różny jest sposób wysterowania każdego konałau:
+  * **Kanał 1** \- wysyłanie dowolnej wartości na adres XXFE\. Wysyłana wartość nie jest istotna, każda czynność wysłania zmienia stan przebiegu na przeciwny\. 
+  * **Kanał 2** \- wysyłanie wartości na adres XX00 lub XX08 pozwala zmieniać stan generatora\. Wysłanie wartości zerowej zmienia stan na niski, a wysłanie wartości niezerowej zmienia stan na wysoki\. W przypadku wartości niezerowej, konkretna wartość nie ma znaczenia\. Wielokrotne wysyłanie wartości zerowej z rzędu lub wielokrotne wysyłanie wartości niezerowej z rzędu nie zmienia stanu generoatora\.
+* **AY\-3\-8910** \- trzykanałowy generator dźwieku i szumu, zawiera 15 rejestrów, w tym 13 rejestrów związanych z generowaniem dźwięku\. Sterowanie odbywa się poprzez wysłanie numeru rejestru na adres FFFD, a następnie wysłanie wartości na adres BFFD\.
 
 ## Ustawienia
 
@@ -47,8 +52,12 @@ Dostępne są następujące opcje:
 * **Negatyw** \- Wyświetlanie czarnych znaków na białym tle zamiast białych znaków na czarnym tle \(odwrócone kolory\)\.
 * **Kolory** \- Używanie kolorów według danych zapisanych w obszarze od FC00 do FEFF\. Ta funkcjonalność nie jest dostepna w oryginalnym komputerze\.
 * **Zamiana kolorów** \- Zamiana koloru tła z kolorem znaku\.
+* **Wspólna pamięć F800\-FBFF i FC00\-FFFF** \- Wskazanie, że pamięć z tych dwóch zakresów ma być wspólna, co miało miejsce w pierwotnej konstrukcji Cobra1, ale uniemożliwia zastosowanie kolorowego obrazu\.
+* **Częstotliwość AY\-3\-8910 \(Hz\)** \- częstotliwość zegara taktującego generator AY\-3\-8910\.
+* **Okres przerwania INT \(ms\)** \- okres między dwoma wyzwoleniami przerwania maskowalnego\. Wpisanie wartości **0** spowoduje wyłączenie generowania przerwania\.
 * **Głośność sygnalizatora** \- Głośność dźwięku sygnalizatora \(dźwięk odtwarzany z pliku **sound\.wav**\), zbyt duża wartość głośności może spowodować przesterowanie\.
 * **Głośność generatora** \- Głośność dźwięku generatora przebiegu prostokątnego, zbyt duża wartość głośności może spowodować przesterowanie\.
+* **Głośnosć AY\-3\-8910** \- Głośnośćdźwięku generatora AY\-3\-8910, zbyt duża wartość głośności może spowodować przesterowanie\.
 * **Okres timera \(ms\)** \- Okres wewnętrznego timera sterującego odświeżaniem obrazu i buforowaniem dźwięku, wartość należy ustawić doświadczalnie\.
 * **Długość bufora \(smp\)** \- Bufor karty dźwiękowych wyrażona w próbkach dźwięku, wartość należy ustawić doświadczalnie\.
 * **Długość elementu \(smp\)** \- Długość jednego elementu buforowanego dźwięku wyrażona w próbkach, wartość należy ustawić doświadczalnie\.

@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>650</height>
+    <width>700</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Pomoc i ustawienia</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_4">
+   <item row="0" column="0">
     <widget class="QGroupBox" name="HelpInfoP">
      <property name="title">
       <string>Klawisze sterujące</string>
@@ -40,13 +40,88 @@ F11 - Jeden krok</string>
      </layout>
     </widget>
    </item>
-   <item>
+   <item row="0" column="1" rowspan="2">
     <widget class="QGroupBox" name="SettingsP">
      <property name="title">
       <string>Ustawienia</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="7" column="1">
+      <item row="11" column="1">
+       <widget class="QSlider" name="VolumeAYS">
+        <property name="maximum">
+         <number>250</number>
+        </property>
+        <property name="value">
+         <number>125</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="1">
+       <widget class="QLineEdit" name="AudioElementT">
+        <property name="text">
+         <string>1500</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QCheckBox" name="ScreenSwap">
+        <property name="text">
+         <string>Zamiana kolorów</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="2">
+       <widget class="QCheckBox" name="ScreenMemCommon">
+        <property name="text">
+         <string>Wspólna pamięć F800-FBFF i FC00-FFFF</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="0">
+       <widget class="QLabel" name="AudioTimerL">
+        <property name="text">
+         <string>Okres timera (ms):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="QLineEdit" name="AudioBufferT">
+        <property name="text">
+         <string>7000</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QSlider" name="VolumeBeepS">
+        <property name="maximum">
+         <number>250</number>
+        </property>
+        <property name="value">
+         <number>125</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="VolumeSoundL">
+        <property name="text">
+         <string>Głośność generatora:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0">
+       <widget class="QLabel" name="AudioBufferL">
+        <property name="text">
+         <string>Długość bufora (smp):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
        <widget class="QSlider" name="VolumeSoundS">
         <property name="maximum">
          <number>250</number>
@@ -60,122 +135,94 @@ F11 - Jeden krok</string>
        </widget>
       </item>
       <item row="9" column="0">
-       <widget class="QLabel" name="AudioBufferL">
-        <property name="text">
-         <string>Długość bufora (smp):</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="VolumeSoundL">
-        <property name="text">
-         <string>Głośność generatora:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QCheckBox" name="ScreenSwap">
-        <property name="text">
-         <string>Zamiana kolorów</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="ScreenColors">
-        <property name="text">
-         <string>Kolory</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="AudioElementL">
-        <property name="text">
-         <string>Długość elementu (smp):</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QLineEdit" name="AudioTimerT">
-        <property name="text">
-         <string>20</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="AudioTimerL">
-        <property name="text">
-         <string>Okres timera (ms):</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QSlider" name="VolumeBeepS">
-        <property name="maximum">
-         <number>250</number>
-        </property>
-        <property name="value">
-         <number>125</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QLineEdit" name="AudioBufferT">
-        <property name="text">
-         <string>7000</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1">
-       <widget class="QLineEdit" name="AudioElementT">
-        <property name="text">
-         <string>1500</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
        <widget class="QLabel" name="VolumeBeepL">
         <property name="text">
          <string>Głośność sygnalizatora:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="11" column="0">
+       <widget class="QLabel" name="VolumeAYL">
+        <property name="text">
+         <string>Głośność AY-3-8910:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="AudioAYFreqL">
+        <property name="text">
+         <string>Częstotliwość AY-3-8910 (Hz):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="1">
+       <widget class="QLineEdit" name="AudioTimerT">
+        <property name="text">
+         <string>20</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QCheckBox" name="ScreenColors">
+        <property name="text">
+         <string>Kolory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
        <widget class="QCheckBox" name="ScreenNegative">
         <property name="text">
          <string>Negatyw</string>
         </property>
        </widget>
       </item>
+      <item row="16" column="0">
+       <widget class="QLabel" name="AudioElementL">
+        <property name="text">
+         <string>Długość elementu (smp):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="AudioAYFreqT"/>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="InterruptPeriodL">
+        <property name="text">
+         <string>Okres przerwania INT (ms):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLineEdit" name="InterruptPeriodT"/>
+      </item>
      </layout>
     </widget>
    </item>
-   <item>
+   <item row="1" column="0">
     <widget class="QGroupBox" name="DebugP">
      <property name="title">
       <string>Debugowanie</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
+      <item row="4" column="0">
        <widget class="QCheckBox" name="DebugReg0">
         <property name="text">
          <string>Pamięć</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="DebugSaveFile">
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="DebugReg3">
         <property name="text">
-         <string>Do pliku na bieżąco</string>
+         <string>Rejestry IX,IY,SP,I,R</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="DebugReg1">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="DebugSaveFile">
         <property name="text">
-         <string>Rejestry ABCDEFHL główne</string>
+         <string>Do pliku na bieżąco</string>
         </property>
        </widget>
       </item>
@@ -186,14 +233,14 @@ F11 - Jeden krok</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="DebugReg3">
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="DebugReg1">
         <property name="text">
-         <string>Rejestry IX,IY,SP,I,R</string>
+         <string>Rejestry ABCDEFHL główne</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="7" column="0">
        <widget class="QCheckBox" name="DebugReg2">
         <property name="text">
          <string>Rejestry ABCDEFHL dodatkowe</string>
@@ -214,12 +261,8 @@ F11 - Jeden krok</string>
   <tabstop>AudioTimerT</tabstop>
   <tabstop>AudioBufferT</tabstop>
   <tabstop>AudioElementT</tabstop>
-  <tabstop>DebugTrace</tabstop>
-  <tabstop>DebugSaveFile</tabstop>
   <tabstop>DebugReg0</tabstop>
-  <tabstop>DebugReg1</tabstop>
   <tabstop>DebugReg3</tabstop>
-  <tabstop>DebugReg2</tabstop>
  </tabstops>
  <resources/>
  <connections/>

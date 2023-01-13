@@ -10,6 +10,7 @@
 #include "keyboard.h"
 #include "tape.h"
 #include <queue>
+#include "audioay.h"
 
 
 
@@ -54,6 +55,7 @@ public:
     int RomSize2[256];
     uchar * RomMem;
     int RomNo;
+    AudioAY * AudioAY_;
 
     void SetBank(int N);
 
@@ -67,6 +69,8 @@ public:
     bool SoundSignal;
     char SoundLevel1;
     char SoundLevel2;
+
+    bool ScreenMemCommon = false;
 
     Keyboard * Keyboard_;
     Tape * Tape_;
@@ -90,8 +94,13 @@ public:
     int Printer;
 
     list<uchar> PrintBuffer;
+    int InterruptPeriod = 0;
+    void InterruptPeriodCalc();
 
 private:
+    int InterruptCpuPeriod = 0;
+    int InterruptCpuCounter = 0;
+
     bool Halted;
     char AddrOffset;
 
@@ -105,8 +114,6 @@ private:
     bool InterruptINT;
     bool InterruptNMI;
 
-
-    int CycleCounter;
 
     uchar InterruptMode;
 

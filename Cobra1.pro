@@ -13,6 +13,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
+    audioay.cpp \
     configfile.cpp \
         mainwindow.cpp \
     eden.cpp \
@@ -28,6 +29,7 @@ SOURCES += main.cpp\
     helpsettings.cpp
 
 HEADERS  += mainwindow.h \
+    audioay.h \
     binary.h \
     configfile.h \
     eden.h \

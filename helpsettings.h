@@ -48,6 +48,14 @@ private slots:
 
     void on_ScreenSwap_toggled(bool checked);
 
+    void on_ScreenMemCommon_toggled(bool checked);
+
+    void on_VolumeAYS_valueChanged(int value);
+
+    void on_AudioAYFreqT_textChanged(const QString &arg1);
+
+    void on_InterruptPeriodT_textChanged(const QString &arg1);
+
 private:
     Ui::HelpSettings *ui;
 };
