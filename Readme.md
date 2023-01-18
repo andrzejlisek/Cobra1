@@ -123,6 +123,42 @@ Do tego celu służą następujące pola w sekcji **Pamięć**:
 
 Przycisk **Wybierz plik** pozwala wybrać dowolny plik\. Jeżeli nie ma pełnej ścieżki dostępu, zostanie wczytany plik znajdujący się w folderze z emulatorem\. Aby zmiana plików odniosła skutek, po wybraniu plików należy wyzerować emulator za pomocą klawisza **F8**\.
 
+# Rejestrowanie pracy emulatora
+
+Emulator umożliwia rejestrowanie do pliku wykonywanie programu, co umożliwia śledzenie i analizę wykonywanego kodu\.
+
+## Zasada działania i struktura plików
+
+W przypadku włączonego rejestrowania pracy, rejestrowana jest każda sesja osobno, od uruchomienia emulatora \(klawisz **F5**\) do jego zatrzymania \(klawisz **F6**\)\. Włączenie lub wyłączenie opcji lub zmiana zakresu rejestrowanych informacji wykonana podczas pracy emulatora nie wpływa na biezacą rejestrację do momentu zatrzymania\.
+
+Podczas rejestrowania pracy tworzone są dwa pliki, przy czym w miejscu znaku **X** w nazwie dopisywany jest kolejny numer:
+
+
+* **progtraceX\.txt** \- Wykonane rozkazy, ewentualnie bajty pamięci i wartości rejestrów w kolejności faktycznego ich wykonania, zgodnie z przebiegiem działania programu uruchomionego w emulatorze\.
+* **progmemX\.txt** \- Plik generowany po zatrzymaniu emuatora i zawierajacey rozkazy w formie kodu źródłowego i ewentualnie bajty w pamięci\. Ten plik ułatwia odtworzenie kodu asm uruchomionego programu\.
+
+Każdy wpis w obu plikach zawiera następujące elementy:
+
+
+1. Adres składajacy się z dwóch liczb:
+   * Numer banku pamięci w przypadku wykonywania rozkazu z pamięci ROM lub "**\_\_**" w przypadku wykonywania programu z pamięci RAM\.
+   * Numer bajtu w przestrzeni adresowej procesora Z80\.
+2. Rozkaz otrzymany poprzez interpretację bajtów z pamięci\. W przypadku rozkazów skoków względnych, w miejscu adresu jest liczba poprzedzona znakiem "**\_**", która wskazuje numer bajtu, pod który jest wykonywany skok\. To ułatwia ręczne śledzenie działania programu\.
+3. Bajty w pamięci, które składają się na rozkaz, element opcjonalny\.
+
+Dodatkowo, plik **progtraceX\.txt** może opcjonalnie zawierać stany poszczególnych rejestrów w chwili poprzedzającej wykonanie danego rozkazu\.
+
+Aby prawidłowo zarejestrować pracę, należy uruchomić i zatrzymać pracę emulatora\. Z przyczyn technicznych, zamknięcie emulatora podczas pracy może spowodować nieprawidłowe zarejestrowanie pracy wykonanej od ostatniego wystartowania do chwili zamknięcia programu\.
+
+## Ustawienia rejestrowania pracy
+
+Rejestrowanie pracy konfiguruje się w oknie ustawień \(klawisz **F1**\), w sekcji **Rejestrowanie pracy**\. Dostępne są następujące opcje:
+
+
+* **Rejestrowanie rozkazów** \- Włącza lub wyłacza rejestrowanie wykonywanych rozkazów do plików\. Podczas rejestrowania pracy, emulacja może być spowolniona\.
+* **Pamięć** \- Zapisywanie wartości bajtów z pamięci, które tworzą rejestrowane rozkazy\. Ta opcja dotyczy obu plików\.
+* **Rejestry \.\.\.** \- Cztery opcje dotyczące poszczególnych grup rejestrów, dotyczą wyłącznie pliku **progtraceX\.txt**\.
+
 
 
 

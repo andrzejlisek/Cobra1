@@ -25,11 +25,11 @@ void HelpSettings::Init()
     ui->AudioBufferT->setText(Eden::ToQStr(Core->SoundBufSize));
     ui->AudioElementT->setText(Eden::ToQStr(Core->SoundChunkSize));
     ui->DebugTrace->setChecked(Core->CpuMem_->DebugTrace);
-    ui->DebugSaveFile->setChecked(Core->CpuMem_->DebugSaveFile);
     ui->DebugReg0->setChecked(Core->CpuMem_->DebugReg0);
     ui->DebugReg1->setChecked(Core->CpuMem_->DebugReg1);
     ui->DebugReg2->setChecked(Core->CpuMem_->DebugReg2);
     ui->DebugReg3->setChecked(Core->CpuMem_->DebugReg3);
+    ui->DebugReg4->setChecked(Core->CpuMem_->DebugReg4);
     ui->AudioAYFreqT->setText(Eden::ToQStr(Core->AudioAY_->ChipClock));
     ui->InterruptPeriodT->setText(Eden::ToQStr(Core->CpuMem_->InterruptPeriod));
 
@@ -75,11 +75,6 @@ void HelpSettings::on_AudioElementT_textChanged(const QString &arg1)
 void HelpSettings::on_DebugTrace_toggled(bool checked)
 {
     Core->CpuMem_->DebugTrace = checked;
-}
-
-void HelpSettings::on_DebugSaveFile_toggled(bool checked)
-{
-    Core->CpuMem_->DebugSaveFile = checked;
 }
 
 void HelpSettings::on_DebugReg0_toggled(bool checked)
@@ -130,4 +125,9 @@ void HelpSettings::on_InterruptPeriodT_textChanged(const QString &arg1)
 {
     Core->CpuMem_->InterruptPeriod = Eden::ToInt(arg1);
     Core->CpuMem_->InterruptPeriodCalc();
+}
+
+void HelpSettings::on_DebugReg4_toggled(bool checked)
+{
+    Core->CpuMem_->DebugReg4 = checked;
 }

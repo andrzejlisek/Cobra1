@@ -68,6 +68,7 @@ void AudioAY::SetRegV(uchar V)
     int V_ = V;
 
     //cout << "R" << RegN << " = " << (int)V << "   " << Eden::IntToHex8(V) << endl;
+    bool SoundGen = IsSoundGeneration();
 
     switch (RegN)
     {
@@ -242,20 +243,28 @@ void AudioAY::SetRegV(uchar V)
         }
     }
 
-    // Resetowanie generatora obwiedni
-    bool SoundNotGenerated = true;
-    if (ChannelTone[0] && (ChannelCounter[0] != 0)) SoundNotGenerated = false;
-    if (ChannelTone[1] && (ChannelCounter[1] != 0)) SoundNotGenerated = false;
-    if (ChannelTone[2] && (ChannelCounter[2] != 0)) SoundNotGenerated = false;
-    if ((ChannelNoise[0] || ChannelNoise[1] || ChannelNoise[2]) && (ChannelCounter[3] != 0)) SoundNotGenerated = false;
-    if (SoundNotGenerated)
+    // Jezeli AY nie wytwarzal dzwieku, ale po zmianie rejestru powinien go wytwarzac,
+    // nalezy zresetowac generator obwiedni
+    if ((!SoundGen) && (IsSoundGeneration()))
     {
         EnvelopeCounter = 0;
         EnvelopeState = 0;
     }
 }
 
-
+///
+/// \brief AudioAY::IsSoundGeneration - Sprawdzanie, czy AY w danej chwili generuje dzwiek
+/// \return
+///
+bool AudioAY::IsSoundGeneration()
+{
+    bool SoundGenerated = false;
+    if (ChannelTone[0] && (ChannelCounter[0] != 0)) SoundGenerated = true;
+    if (ChannelTone[1] && (ChannelCounter[1] != 0)) SoundGenerated = true;
+    if (ChannelTone[2] && (ChannelCounter[2] != 0)) SoundGenerated = true;
+    if ((ChannelNoise[0] || ChannelNoise[1] || ChannelNoise[2]) && (ChannelCounter[3] != 0)) SoundGenerated = true;
+    return SoundGenerated;
+}
 
 void AudioAY::Clock()
 {

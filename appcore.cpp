@@ -66,11 +66,11 @@ AppCore::AppCore()
     CF.ParamGet("SoundBufSize", SoundBufSize);
     CF.ParamGet("SoundChunkSize", SoundChunkSize);
     CF.ParamGet("CpuMem_DebugTrace", CpuMem_->DebugTrace);
-    CF.ParamGet("CpuMem_DebugSaveFile", CpuMem_->DebugSaveFile);
     CF.ParamGet("CpuMem_DebugReg0", CpuMem_->DebugReg0);
     CF.ParamGet("CpuMem_DebugReg1", CpuMem_->DebugReg1);
     CF.ParamGet("CpuMem_DebugReg2", CpuMem_->DebugReg2);
     CF.ParamGet("CpuMem_DebugReg3", CpuMem_->DebugReg3);
+    CF.ParamGet("CpuMem_DebugReg4", CpuMem_->DebugReg4);
     CF.ParamGet("Tape_SetThreshold", Tape_->SetThreshold);
     CF.ParamGet("Tape_SetThreshold0", Tape_->SetThreshold0);
     CF.ParamGet("Tape_SetSample", Tape_->SetSample);
@@ -118,11 +118,11 @@ void AppCore::SettingsSave()
     CF.ParamSet("SoundBufSize", SoundBufSize);
     CF.ParamSet("SoundChunkSize", SoundChunkSize);
     CF.ParamSet("CpuMem_DebugTrace", CpuMem_->DebugTrace);
-    CF.ParamSet("CpuMem_DebugSaveFile", CpuMem_->DebugSaveFile);
     CF.ParamSet("CpuMem_DebugReg0", CpuMem_->DebugReg0);
     CF.ParamSet("CpuMem_DebugReg1", CpuMem_->DebugReg1);
     CF.ParamSet("CpuMem_DebugReg2", CpuMem_->DebugReg2);
     CF.ParamSet("CpuMem_DebugReg3", CpuMem_->DebugReg3);
+    CF.ParamSet("CpuMem_DebugReg4", CpuMem_->DebugReg4);
     CF.ParamSet("Tape_SetThreshold", Tape_->SetThreshold);
     CF.ParamSet("Tape_SetThreshold0", Tape_->SetThreshold0);
     CF.ParamSet("Tape_SetSample", Tape_->SetSample);

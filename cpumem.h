@@ -60,11 +60,11 @@ public:
     void SetBank(int N);
 
     bool DebugTrace = false;
-    bool DebugSaveFile = false;
     bool DebugReg0 = false;
     bool DebugReg1 = false;
     bool DebugReg2 = false;
     bool DebugReg3 = false;
+    bool DebugReg4 = false;
 
     bool SoundSignal;
     char SoundLevel1;
@@ -97,7 +97,10 @@ public:
     int InterruptPeriod = 0;
     void InterruptPeriodCalc();
 
+    bool ProgramWorking;
+    bool ProgramWorking_ = false;
 private:
+    int FileNumber = 1;
     int InterruptCpuPeriod = 0;
     int InterruptCpuCounter = 0;
 
@@ -139,7 +142,6 @@ private:
     bool Reg_IFF1;
     bool Reg_IFF2;
 
-    bool ProgramWorking;
     void ProgramWork(bool OneStep);
 
     void CpuCyclePre(int N1);

@@ -142,14 +142,20 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
                 }
                 break;
             case Qt::Key_F5: // F5 - Start
-                setWindowTitle("Cobra 1 (pracuje)");
-                SoundStart();
-                Core->CpuMem_->ProgStart(0);
+                if (!Core->CpuMem_->ProgramWorking_)
+                {
+                    setWindowTitle("Cobra 1 (pracuje)");
+                    SoundStart();
+                    Core->CpuMem_->ProgStart(0);
+                }
                 break;
             case Qt::Key_F6: // F6 - Stop
-                setWindowTitle("Cobra 1 (zatrzymany)");
-                Core->CpuMem_->ProgStop();
-                SoundStop();
+                if (Core->CpuMem_->ProgramWorking_)
+                {
+                    setWindowTitle("Cobra 1 (zatrzymany)");
+                    Core->CpuMem_->ProgStop();
+                    SoundStop();
+                }
                 break;
             case Qt::Key_F7: // F7 - Reset
                 Core->CpuMem_->Reset(0);

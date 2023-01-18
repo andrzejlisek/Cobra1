@@ -34,8 +34,6 @@ private slots:
 
     void on_DebugTrace_toggled(bool checked);
 
-    void on_DebugSaveFile_toggled(bool checked);
-
     void on_DebugReg0_toggled(bool checked);
 
     void on_DebugReg1_toggled(bool checked);
@@ -55,6 +53,8 @@ private slots:
     void on_AudioAYFreqT_textChanged(const QString &arg1);
 
     void on_InterruptPeriodT_textChanged(const QString &arg1);
+
+    void on_DebugReg4_toggled(bool checked);
 
 private:
     Ui::HelpSettings *ui;

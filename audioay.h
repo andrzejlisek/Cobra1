@@ -26,6 +26,8 @@ public:
     // 15 -> 59 probek dzwieku na 20 probek chipu -> 2,98 probek dzwieku
 
 private:
+    bool IsSoundGeneration();
+
     int RegN;
 
     int EnvelopePeriod;

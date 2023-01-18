@@ -202,27 +202,20 @@ F11 - Jeden krok</string>
    <item row="1" column="0">
     <widget class="QGroupBox" name="DebugP">
      <property name="title">
-      <string>Debugowanie</string>
+      <string>Rejestrowanie pracy</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="4" column="0">
-       <widget class="QCheckBox" name="DebugReg0">
-        <property name="text">
-         <string>Pamięć</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
+      <item row="6" column="0">
        <widget class="QCheckBox" name="DebugReg3">
         <property name="text">
-         <string>Rejestry IX,IY,SP,I,R</string>
+         <string>Rejestry IX,IY,SP</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="DebugSaveFile">
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="DebugReg1">
         <property name="text">
-         <string>Do pliku na bieżąco</string>
+         <string>Rejestry AFBCDEHL główne</string>
         </property>
        </widget>
       </item>
@@ -233,17 +226,24 @@ F11 - Jeden krok</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QCheckBox" name="DebugReg1">
+      <item row="7" column="0">
+       <widget class="QCheckBox" name="DebugReg4">
         <property name="text">
-         <string>Rejestry ABCDEFHL główne</string>
+         <string>Rejestry I,R</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="5" column="0">
        <widget class="QCheckBox" name="DebugReg2">
         <property name="text">
-         <string>Rejestry ABCDEFHL dodatkowe</string>
+         <string>Rejestry AFBCDEHL dodatkowe</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="DebugReg0">
+        <property name="text">
+         <string>Pamięć</string>
         </property>
        </widget>
       </item>
