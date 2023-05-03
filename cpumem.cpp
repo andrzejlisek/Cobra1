@@ -4459,6 +4459,8 @@ void CpuMem::DoIN(uchar AddrH, uchar AddrL, uchar &Reg, bool Flags)
 
         // Magnetofon
         Reg = Reg & Tape_->GetState();
+
+        //cout << Eden::IntToHex8(AddrH) << Eden::IntToHex8(AddrL) << " = " << Eden::IntToHex8(Reg) << endl;
     }
 
     //if (NoStd)

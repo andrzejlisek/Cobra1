@@ -23,6 +23,7 @@ public:
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
     void on_PrinterTimer_Tick();
+    void Init();
 
 private slots:
     void on_SendClear_clicked();
@@ -38,6 +39,8 @@ private slots:
     void on_LinePause_textChanged(const QString &arg1);
 
     void on_KeybSelect_currentIndexChanged(int index);
+
+    void on_SendExt_toggled(bool checked);
 
 private:
     Ui::ScreenKeyb *ui;

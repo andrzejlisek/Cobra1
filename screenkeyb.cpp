@@ -36,6 +36,15 @@ void ScreenKeyb::keyReleaseEvent(QKeyEvent* event)
     Core->keyReleaseEvent(event);
 }
 
+void ScreenKeyb::Init()
+{
+    ui->KeybSelect->setCurrentIndex(Core->KeybMode);
+    ui->SendSpeed->setText(Eden::ToQStr(Core->KeySpeed));
+    ui->LinePause->setText(Eden::ToQStr(Core->LinePause));
+    ui->SendExt->setChecked(Core->KeybModeText != 0);
+    ui->ReceivePrinter->setCurrentIndex(Core->CpuMem_->Printer);
+}
+
 void ScreenKeyb::on_SendClear_clicked()
 {
     ui->SendText->clear();
@@ -98,5 +107,17 @@ void ScreenKeyb::on_KeybSelect_currentIndexChanged(int index)
     if (index == 1)
     {
         ui->KeybInfo->setText("` - CAP   { - CTR   } - CLS   \\ - SH   Enter - CR");
+    }
+}
+
+void ScreenKeyb::on_SendExt_toggled(bool checked)
+{
+    if (checked)
+    {
+        Core->KeybModeText = 1;
+    }
+    else
+    {
+        Core->KeybModeText = 0;
     }
 }

@@ -14,11 +14,23 @@ Komputer Cobra 1 posiada jeden tryb pracy ekranu, który jest trybem tekstowym\.
 
 ## Klawiatura
 
-Komputer Cobra 1 posiada klawiaturę składającą się z 40 klawiszy, jednakże układ znaków specjalnych jest inny niż powszechnie przyjęty\. Emulator obsługuje wciśnięcia i puszczenia poszczególnych klawiszy, natomiast interpretacją zajmuje się uruchomione oprogramowanie\. Klawisze są podzielone na 8 grup po 5 klawiszy każda\. Odczyt stanu klawiatury polega na odczycie adresu XX80, gdzie wartość XX wskazuje wybrane grupy, przy czym w każdym bicie wybrana grupa to 0, a niewybrana grupa to 1\. W odczytanej wartości, bity od 0 do 4 wskazują naciśnięte klawisze\. Aby jednoznacznie odczytać, które klawisze zostały nacisnięte, należy odczytać kolejno adresy FE80, FD80, FB80, F780, EF80, DF80, BF80 i 7F80\. Jest to jedyna obsługiwana czynność IO, w której jest istony bardziej znaczący bajt adresy\.
+Komputer Cobra 1 posiada klawiaturę składającą się z 40 klawiszy, jednakże układ znaków specjalnych jest inny niż powszechnie przyjęty\. Emulator obsługuje wciśnięcia i puszczenia poszczególnych klawiszy, natomiast interpretacją zajmuje się uruchomione oprogramowanie\. Klawisze są podzielone na 8 grup po 5 klawiszy każda, jednak emulator obsługuje rozszerzoną klawiaturę, w której jest 7 klawiszy w każdej grupie\. Odczyt stanu klawiatury polega na odczycie adresu XX80, gdzie wartość XX wskazuje wybrane grupy, przy czym w każdym bicie wybrana grupa to 0, a niewybrana grupa to 1\. W odczytanej wartości, bity od 0 do 6 wskazują naciśnięte klawisze \(w oryginalnym komputerze Cobra 1 naciśnięte klawisze są reprezentowane przez bity od 0 do 4\)\. Aby jednoznacznie odczytać, które klawisze zostały nacisnięte, należy odczytać kolejno adresy FE80, FD80, FB80, F780, EF80, DF80, BF80 i 7F80\. Jest to jedyna obsługiwana czynność IO, w której istony jest bardziej znaczący bajt adresu\.
 
-Naciśnięcie klawisza **Esc** powoduje wyświetlenie okna przedstawiającego układ klawiatury i interfejs umożliwiający wysyłanie i odbieranie tekstu\.
+Korzystanie z rozszerzonej klawiatury wymaga odpowiednio dostosowanego oprogramowania, oryginalny program systemowy i BASIC nie obsługuje dodatkowych klawiszy\. W celu zachowania kompatybilności, znak kropki \(klawisz obok klawisza SP\) wprowadza się poprzez naciśnięcie klawisza ze znakami **/** i **?** lub przecinka/kropki na klawiaturze numerycznej\. Klawisze przecinka lub kropki sa używane w ramach klawiatury rozszerzonej\. Z tego też względu, w przypadku oprogramowania dostosowanego do rozszerzonej klawiatury, naciśnięcie klawisza kropki na klawiaturze numerycznej powoduje taki sam skutek, jak naciśnięcie klawisza ze znakami **/** i **?**\. Funkcję klawisza CLS z klawiatury rozszerzonej uzyskuje się poprzez naciśnięcie klawisza ze znakami **\\** i **&#124;**\.
 
-Poniżej układu klawiatury jest lista rozwijana wyboru trybu pracy klawiatury\. Tryb **Cobra 1** to działanie klawiatury w sposób zbliżony do oryginalnej, natomiast tryb **PC** to tryb mapowania klawiszy i kombinacji do klawiszy na klawiaturze PC\. Oznacza to, że klawisz **Shift** nie powoduje emulacji naciśnięcia odpowiedniego klawisza, lecz służy do wprowadzania wielkich i małych liter oraz znaków specjalnych\.
+Naciśnięcie klawisza **Esc** powoduje wyświetlenie okna przedstawiającego układ rozszeronej klawiatury i interfejs umożliwiający wysyłanie i odbieranie tekstu\. Przyciski na obrazie klawiatury służą wyłącznie celom prezentacyjnym, klikanie ich nie wywołuje żadnego działania\. Standardowe klawisze są zawarte w pierwszych i ostatnich pięciu kolumnach i oznaczenia odpowiadają oryginalnym klawiszom komputera Cobra 1\. Klawisze rozszerzające są zawarte w czterech środkowych kolumnach, są wyszarzone dla odróżniena\. Patrząc od lewej, poszczególnym kolumnom sa przypisane następujące klawisze:
+
+
+1. Znaki na klawiaturze numerycznej\.
+2. Odpowiednio od góry do dołu: Backspace, Tabulator, klawisz ze znakami **\\** i **&#124;**, Caps Lock\.
+3. Klawisze ze znakami według oznaczeń\.
+4. Klawisze ze znakami według oznaczeń\.
+
+Klawisz Caps Lock działa tak samo, jak każdy inny klawisz, czyli wysyłany jest stan naciśnięcia lub nienaciśnięcia klawiasza\. Aktualny stan Caps Lock prezentowany poprzez kontrolkę w klawiaturze nie jest odczytywany ani brany pod uwagę\.
+
+Poniżej układu klawiatury jest lista rozwijana wyboru trybu pracy klawiatury\. Tryb **Cobra 1** to działanie klawiatury w sposób zbliżony do oryginalnej uwzględniając rozszerzenie klawiatury, natomiast tryb **PC** to tryb mapowania klawiszy i kombinacji oryginalnej klawiatury do klawiszy na klawiaturze PC, w tym przypadku rozszerzenie klawiatury nie jest brane pod uwagę\. Oznacza to, że klawisz **Shift** nie powoduje emulacji naciśnięcia odpowiedniego klawisza, lecz służy do wprowadzania wielkich i małych liter oraz znaków specjalnych\.
+
+W przypadku wyboru **PC**, należy wyłączyć zaznaczenie pola **Klawiatura rozszerzona**, aby działały wszystkie klawisze prawidłowo\. Wynika to z faktu, że jest to tryb dostosowany do emulacji wprowadzania niektórych znaków z klawiszem **SH** za pomocą standardowej klawiatury i we współpracy z oryginalnym oprogramowaniem\.
 
 Funkcje specjalne, sa przypisane do następujących klawiszy:
 
@@ -64,25 +76,27 @@ Dostępne są następujące opcje:
 
 # Wymiana danych
 
-## Wczytywanie danych
-
-W czasie pracy jest możliwe wczytywanie danych do pamięci lub w postaci naciśnięć klawiszy\. W tym celu należy nacisnąć klawisz **F2**, wybrać typ pliku i wybrać plik\. Typ **Intel HEX** to plik tekstowy z zapisanymi adresami i wartościami bajtów, wczytanie takiego pliku nie wymaga dodatkowych parametrów\. Typ **Binary** to plik, w którym kolejne bajty pliku odpowiadają wartościom kolejnych bajtów w pamięci\. Po wybraniu takiego pliku należy podać adres, od którego rozpocznie się wczytywanie\. W przypadku pliku **Intel HEX** i **Binary** możliwe jest nadpisanie zawartości pamięci ROM\.
-
-Jest jeszcze trzeci możliwy typ, którym jest typ **Keystrokes**\. Jest to plik tekstowy, w którym są zawarte znaki znajdujące się na klawiszach\. Przy wczytywaniu zakłada się standardowy sposób obsługi klawiatury oraz, że klawisze **SH**\+**T** \(**CAP**\) przełączają pomiędzy wielkimi i małymi literami\. Wczytywanie pliku należy rozpocząć w trybie wielkich liter \(domyślny tryb pracy klawiatury\)\. Wprowadzenie jednego znaku to dwie czynności, naciśnięcie klawisza i zwolnienie klawisza\. W rzeczywistości są liczone wszystkie czynności, więc symulacja naciśnięcia **SH**\+**T** jest liczona jako cztery czynności\. Podobnie jest ze znakami specjalnymi, wczytanie takiego znaku to też cztery czynności\.
-
-Wczytywane są wyłącznie takie znaki, które występują na klawiaturze komputera Cobra 1\. Dodatkowo, w pliku mogą występować znaki **~** oraz **\_**\. Taki znak oznacza odczekanie czasu wprowadzenia jednego znaku, użyteczne w przypadku wczytywania sekwencji naciśnięć klawiszy, w czasie których wymagane są dłuższe przerwy w określonych miejscach sekwencji ze względu na działanie programu\.
-
-## Zapisywanie danych
-
-Oprócz wczytywania, można tez zapisywać dane z pamięci do pliku typu **Binary** lub pliku typu **Intel Hex**\. Aby zapisać dowolny fragment pamięci, należy nacisnąć klawisz **F3**, a następnie wskazać typ pliku i podać nazwę pliku\. Niezależnie od typu pliku, w następnych dwóch okienkach należy podać adres początkowy i końcowy zapisywanego obszaru pamięci\. Sugerowany jest obszar 0000\-BFFF z tego względu, ze jest to cały obszar pamięci użytkowej przy założeniu, że w komputerze jest zainstalowana pamięć o wielkości 48kB\. Oczywiście można podać dowolne adresy z obszaru od 0000 do FFFF\.
-
 ## Wysyłanie tekstu
 
-Po naciśnięciu **Esc** pojawia się okno zawierające interfejs służący do wysyłania i odbierania tekstu\. Aby wysłać tekst, należy wpisać lub wkleić tekst w pole tekstowe w sekcji **Wysyłanie tekstu**, a także, w razie potrzeby, dobrać wartości w polu **Klawisze na sekundę &#124; Przerwa po Enter**\. Pierwsza wartość to liczba czynności naciśnięcia lub puszczenia klawisza na sekundę, a druga wartość, to liczba okresów naciśnięcia jednego klawisza po naciśnięciu klawisza Enter\. Aby wysłać tekst, należy kliknąć przycisk **Wyślij**, wysyłanie przebiega na tej samej zasadzie, co wczytywanie tekstu z pliku tekstowego typu **Keystrokes**\. Przycisk **Wyczyść** czyści pole do wprowadzania tekstu\.
+Po naciśnięciu **Esc** pojawia się okno zawierające interfejs służący do wysyłania i odbierania tekstu\. Aby wysłać tekst, należy wpisać lub wkleić tekst w pole tekstowe w sekcji **Wysyłanie tekstu**, a także, w razie potrzeby, dobrać wartości w polu **Klawisze na sekundę &#124; Przerwa po Enter**\. Pierwsza wartość to liczba czynności naciśnięcia lub puszczenia klawisza na sekundę, a druga wartość, to liczba okresów naciśnięcia jednego klawisza po naciśnięciu klawisza Enter\. Pod polem jest opcja **Klawiatura rozszerzona**, którą należy włączyć w przypadku korzystania z oprogramowania dostosowanego do klawiatury rozszerzonej\. W przypadku standardowego oprogramowania, tą opcję należy pozostawić wyłączoną\.
+
+Wczytywane są wyłącznie te znaki, które występują na klawiaturze komputera Cobra 1, oprócz tych znaków, w tekście może znajdować się znak ~, który nie jest wczytywany\. Ten znak oznacza odczekanie czasu wprowadzenia jednego znaku, użyteczne w przypadku wczytywania sekwencji naciśnięć klawiszy, w czasie których wymagane są dłuższe przerwy w określonych miejscach sekwencji ze względu na działanie programu\. Znaki inne niż występujące na klawiaturze i znak **~** są ignorowane\. Aby wysłać tekst, należy kliknąć przycisk **Wyślij**, wysyłanie przebiega na tej samej zasadzie, co wczytywanie tekstu z pliku tekstowego typu **Keystrokes**\. Przycisk **Wyczyść** czyści pole do wprowadzania tekstu\.
+
+W przypadku wyłączonej klawiatury rozszerzonej, przy wczytywaniu zakłada się standardowy sposób obsługi klawiatury oraz, że klawisze **SH**\+**T** \(**CAP**\) przełączają pomiędzy wielkimi i małymi literami\. Wczytywanie pliku należy rozpocząć w trybie wielkich liter \(domyślny tryb pracy klawiatury\)\. Wprowadzenie jednego znaku to dwie czynności, naciśnięcie klawisza i zwolnienie klawisza\. W rzeczywistości są liczone wszystkie czynności, więc symulacja naciśnięcia **SH**\+**T** jest liczona jako cztery czynności \(nasiśnięcie **SH**, naciśnięcie **T**, zwolnienie **T** i zwolnienie **SH**\)\. Podobnie jest ze znakami specjalnymi, wczytanie takiego znaku to też cztery czynności\.
 
 ## Odbieranie tekstu
 
 W oknie dostępnym po naciśnięciu klawisza **Esc** zawarty jest interfejs służący do odbiory tekstu\. Aby odebrać tekst, w sekcji **Odbieranie tekstu** należy wybrać odpowiednie urządzenie do symulacji w polu **Symulowane urządzenie**\. Po wybraniu urządzenia, w programie uruchomionym w emulatorze należy wydać polecenie drukujące żądany tekst\. Drukowany tekst jest dopisywany do istniejącego tekstu w polu tekstowym w sekcji **Odbieranie tekstu**\. Okno **Klawiatura i wymiana tekstu** nie musi być otwarte w czasie wysyłania tekstu, można otworzyć po zakończeniu wysyłania tekstu\. Przycisk **Wyczyść** czyście pole tekstowe\. Zajętość drukarki \(brak zdolności do odbioru następnego znaku\) i szybkość pracy drukarki nie jest symulowana, przy sprawdzaniu statusu drukarki, komputer zawsze dostaje odpowiedź interpretowaną tak, że drukarka może przyjąć następny znak\.
+
+## Wczytywanie danych
+
+W czasie pracy jest możliwe wczytywanie danych do pamięci lub w postaci naciśnięć klawiszy\. W tym celu należy nacisnąć klawisz **F2**, wybrać typ pliku i wybrać plik\. Typ **Intel HEX** to plik tekstowy z zapisanymi adresami i wartościami bajtów, wczytanie takiego pliku nie wymaga dodatkowych parametrów\. Typ **Binary** to plik, w którym kolejne bajty pliku odpowiadają wartościom kolejnych bajtów w pamięci\. Po wybraniu takiego pliku należy podać adres, od którego rozpocznie się wczytywanie\. W przypadku pliku **Intel HEX** i **Binary** możliwe jest nadpisanie zawartości pamięci ROM\.
+
+Jest jeszcze trzeci możliwy typ, którym jest typ **Keystrokes**\. Jest to plik tekstowy, który wczytuje się w taki sam sposób, jak wysyłanie tekstu wpisanego w oknie **Klawiatura i wymiana tekstu**\. Opcja **Klawiatura rozszerona** w tym oknie ma taki sam wpływ na przebieg wczytywania z pliku\.
+
+## Zapisywanie danych
+
+Oprócz wczytywania, można tez zapisywać dane z pamięci do pliku typu **Binary** lub pliku typu **Intel Hex**\. Aby zapisać dowolny fragment pamięci, należy nacisnąć klawisz **F3**, a następnie wskazać typ pliku i podać nazwę pliku\. Niezależnie od typu pliku, w następnych dwóch okienkach należy podać adres początkowy i końcowy zapisywanego obszaru pamięci\. Sugerowany jest obszar 0000\-BFFF z tego względu, ze jest to cały obszar pamięci użytkowej przy założeniu, że w komputerze jest zainstalowana pamięć o wielkości 48kB\. Oczywiście można podać dowolne adresy z obszaru od 0000 do FFFF\.
 
 # Magnetofon i pamięć
 

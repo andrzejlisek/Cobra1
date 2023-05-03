@@ -35,6 +35,7 @@ public:
     int SoundVolumeAY = 100;
 
     int KeybMode = 0;
+    int KeybModeText = 0;
 
     Screen * Screen_;
     Keyboard * Keyboard_;
@@ -53,6 +54,7 @@ public:
     void LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X);
     bool LoadKeyStreamCaps = true;
     void LoadKeysVal(bool P, bool R, bool IsShift, int KeyCode);
+    bool LoadKeysShiftState = false;
     int KeySpeed = 20;
     int LinePause = 2;
     void SetCaps(bool C, bool NewCaps);
@@ -60,6 +62,7 @@ public:
     QString LastPath;
     void SaveLastPath(QString X, bool OpenDir);
 
+    void KeyPressRelease(QKeyEvent* event, bool Press);
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
 

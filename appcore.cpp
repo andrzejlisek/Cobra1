@@ -53,6 +53,7 @@ AppCore::AppCore()
     EdenClass::ConfigFile CF;
     CF.FileLoad(Eden::ApplicationDirectory() + "cobra1.cfg");
     CF.ParamGet("KeybMode", KeybMode);
+    CF.ParamGet("KeybModeText", KeybModeText);
     CF.ParamGet("KeySpeed", KeySpeed);
     CF.ParamGet("LinePause", LinePause);
     CF.ParamGet("CpuMem_Printer", CpuMem_->Printer);
@@ -105,6 +106,7 @@ void AppCore::SettingsSave()
 {
     EdenClass::ConfigFile CF;
     CF.ParamSet("KeybMode", KeybMode);
+    CF.ParamSet("KeybModeText", KeybModeText);
     CF.ParamSet("KeySpeed", KeySpeed);
     CF.ParamSet("LinePause", LinePause);
     CF.ParamSet("CpuMem_Printer", CpuMem_->Printer);
@@ -296,19 +298,27 @@ void AppCore::LoadKeysVal(bool P, bool R, bool IsShift, int KeyCode)
     {
         if (P)
         {
-            Keyboard_->KeyStrokes->push_back(b00000000 + (8 << 8));
+            if (!LoadKeysShiftState)
+            {
+                Keyboard_->KeyStrokes->push_back(b00000000 + (8 << 8));
+                LoadKeysShiftState = true;
+            }
             Keyboard_->KeyStrokes->push_back(b00000000 + KeyCode);
         }
         if (R)
         {
             Keyboard_->KeyStrokes->push_back(b10000000 + KeyCode);
-            Keyboard_->KeyStrokes->push_back(b10000000 + (8 << 8));
         }
     }
     else
     {
         if (P)
         {
+            if (LoadKeysShiftState)
+            {
+                Keyboard_->KeyStrokes->push_back(b10000000 + (8 << 8));
+                LoadKeysShiftState = false;
+            }
             Keyboard_->KeyStrokes->push_back(b00000000 + KeyCode);
         }
         if (R)
@@ -382,13 +392,14 @@ void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X
         SetCaps(C, true);
     }
 
+    LoadKeysShiftState = false;
+
     // Wypelnianie wektora nacisniec klawiszy
     for (int I = 0; I < X; I++)
     {
         switch (Temp[I])
         {
             case '~':
-            case '_':
                 if (M == 0)
                 {
                     Keyboard_->KeyStrokes->push_back(b01000000);
@@ -405,113 +416,241 @@ void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X
                     }
                 }
                 break;
-
-            case '1':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000000); break;
-            case '!':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000000); break;
-            case '2':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000001); break;
-            case '"':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000001); break;
-            case '3':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000010); break;
-            case '#':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000010); break;
-            case '4':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000011); break;
-            case '$':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000011); break;
-            case '5':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000100); break;
-            case '%':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000100); break;
-
-            case 'Q': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000000); break;
-            case 'q': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000000); break;
-            case 'W': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000001); break;
-            case 'w': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000001); break;
-            case '{':  if (M == 1) {      LoadKeysVal(P, R, 1, (10 << 8) + b00000001); } break; // CTR
-            case 'E': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000010); break;
-            case 'e': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000010); break;
-            case 'R': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000011); break;
-            case 'r': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000011); break;
-            case 'T': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000100); break;
-            case 't': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000100); break;
-            case '`':  if (M == 1) {      LoadKeysVal(P, R, 1, (10 << 8) + b00000100); } break;
-
-            case 'A': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000000); break;
-            case 'a': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000000); break;
-            case 'S': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000001); break;
-            case 's': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000001); break;
-            case 'D': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000010); break;
-            case 'd': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000010); break;
-            case 'F': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000011); break;
-            case 'f': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000011); break;
-            case 'G': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000100); break;
-            case 'g': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000100); break;
-
-            case '\\': if (M == 1) {      LoadKeysVal(P, R, 0, ( 8 << 8) + b00000000); } break; // SH
-            case 'Z': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000001); break;
-            case 'z': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000001); break;
-            case 'X': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000010); break;
-            case 'x': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000010); break;
-            case ':':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000010); break;
-            case 'C': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000011); break;
-            case 'c': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000011); break;
-            case ';':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000011); break;
-            case 'V': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000100); break;
-            case 'v': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000100); break;
-            case '=':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000100); break;
-
-            case '6':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000100); break;
-            case '&':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000100); break;
-            case '7':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000011); break;
-            case '\'':                    LoadKeysVal(P, R, 1, (12 << 8) + b00000011); break;
-            case '8':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000010); break;
-            case '(':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000010); break;
-            case '9':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000001); break;
-            case ')':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000001); break;
-            case '0':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000000); break;
-
-            case 'Y': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000100); break;
-            case 'y': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000100); break;
-            case '@':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000100); break;
-            case 'U': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000011); break;
-            case 'u': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000011); break;
-            case '[':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000011); break;
-            case 'I': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000010); break;
-            case 'i': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000010); break;
-            case ']':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000010); break;
-            case 'O': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000001); break;
-            case 'o': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000001); break;
-            case '^':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000001); break;
-            case 'P': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000000); break;
-            case 'p': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000000); break;
-            case '}':  if (M == 1) {      LoadKeysVal(P, R, 1, (13 << 8) + b00000000); } break; // CLS
-
-            case 'H': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000100); break;
-            case 'h': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000100); break;
-            case '+':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000100); break;
-            case 'J': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000011); break;
-            case 'j': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000011); break;
-            case '-':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000011); break;
-            case 'K': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000010); break;
-            case 'k': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000010); break;
-            case '*':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000010); break;
-            case 'L': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000001); break;
-            case 'l': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000001); break;
-            case '/':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000001); break;
             case '\r': if (EOL == '\r') { LoadKeysVal(P, R, 0, (14 << 8) + b00000000); if (M == 0) { for (int II = 0; II < LinePause; II++) { Keyboard_->KeyStrokes->push_back(b01000000); Keyboard_->KeyStrokes->push_back(b01000000); } } } break;
             case '\n': if (EOL == '\n') { LoadKeysVal(P, R, 0, (14 << 8) + b00000000); if (M == 0) { for (int II = 0; II < LinePause; II++) { Keyboard_->KeyStrokes->push_back(b01000000); Keyboard_->KeyStrokes->push_back(b01000000); } } } break;
+        }
 
-            case 'B': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000100); break;
-            case 'b': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000100); break;
-            case '?':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000100); break;
-            case 'N': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000011); break;
-            case 'n': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000011); break;
-            case '<':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000011); break;
-            case 'M': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
-            case 'm': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
-            case '>':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000010); break;
-            case ',':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000001); break;
-            case '.':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000001); break;
-            case ' ':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000000); break;
+        if (KeybModeText == 0)
+        {
+            switch (Temp[I])
+            {
+                case '1':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000000); break;
+                case '!':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000000); break;
+                case '2':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000001); break;
+                case '"':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000001); break;
+                case '3':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000010); break;
+                case '#':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000010); break;
+                case '4':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000011); break;
+                case '$':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000011); break;
+                case '5':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000100); break;
+                case '%':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000100); break;
+
+                case 'Q': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000000); break;
+                case 'q': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000000); break;
+                case 'W': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000001); break;
+                case 'w': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000001); break;
+                case '{':  if (M == 1) {      LoadKeysVal(P, R, 1, (10 << 8) + b00000001); } break; // CTR
+                case 'E': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000010); break;
+                case 'e': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000010); break;
+                case 'R': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000011); break;
+                case 'r': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000011); break;
+                case 'T': SetCaps(C, true);   LoadKeysVal(P, R, 0, (10 << 8) + b00000100); break;
+                case 't': SetCaps(C, false);  LoadKeysVal(P, R, 0, (10 << 8) + b00000100); break;
+                case '`':  if (M == 1) {      LoadKeysVal(P, R, 1, (10 << 8) + b00000100); } break;
+
+                case 'A': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000000); break;
+                case 'a': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000000); break;
+                case 'S': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000001); break;
+                case 's': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000001); break;
+                case 'D': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000010); break;
+                case 'd': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000010); break;
+                case 'F': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000011); break;
+                case 'f': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000011); break;
+                case 'G': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 9 << 8) + b00000100); break;
+                case 'g': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 9 << 8) + b00000100); break;
+
+                case '\\': if (M == 1) {      LoadKeysVal(P, R, 0, ( 8 << 8) + b00000000); } break; // SH
+                case 'Z': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000001); break;
+                case 'z': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000001); break;
+                case 'X': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000010); break;
+                case 'x': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000010); break;
+                case ':':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000010); break;
+                case 'C': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000011); break;
+                case 'c': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000011); break;
+                case ';':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000011); break;
+                case 'V': SetCaps(C, true);   LoadKeysVal(P, R, 0, ( 8 << 8) + b00000100); break;
+                case 'v': SetCaps(C, false);  LoadKeysVal(P, R, 0, ( 8 << 8) + b00000100); break;
+                case '=':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000100); break;
+
+                case '6':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000100); break;
+                case '&':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000100); break;
+                case '7':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000011); break;
+                case '\'':                    LoadKeysVal(P, R, 1, (12 << 8) + b00000011); break;
+                case '8':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000010); break;
+                case '(':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000010); break;
+                case '9':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000001); break;
+                case ')':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000001); break;
+                case '0':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000000); break;
+
+                case 'Y': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000100); break;
+                case 'y': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000100); break;
+                case '@':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000100); break;
+                case 'U': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000011); break;
+                case 'u': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000011); break;
+                case '[':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000011); break;
+                case 'I': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000010); break;
+                case 'i': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000010); break;
+                case ']':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000010); break;
+                case 'O': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000001); break;
+                case 'o': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000001); break;
+                case '^':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000001); break;
+                case 'P': SetCaps(C, true);   LoadKeysVal(P, R, 0, (13 << 8) + b00000000); break;
+                case 'p': SetCaps(C, false);  LoadKeysVal(P, R, 0, (13 << 8) + b00000000); break;
+                case '}':  if (M == 1) {      LoadKeysVal(P, R, 1, (13 << 8) + b00000000); } break; // CLS
+
+                case 'H': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000100); break;
+                case 'h': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000100); break;
+                case '+':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000100); break;
+                case 'J': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000011); break;
+                case 'j': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000011); break;
+                case '-':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000011); break;
+                case 'K': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000010); break;
+                case 'k': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000010); break;
+                case '*':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000010); break;
+                case 'L': SetCaps(C, true);   LoadKeysVal(P, R, 0, (14 << 8) + b00000001); break;
+                case 'l': SetCaps(C, false);  LoadKeysVal(P, R, 0, (14 << 8) + b00000001); break;
+                case '/':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000001); break;
+
+                case 'B': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000100); break;
+                case 'b': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000100); break;
+                case '?':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000100); break;
+                case 'N': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000011); break;
+                case 'n': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000011); break;
+                case '<':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000011); break;
+                case 'M': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
+                case 'm': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
+                case '>':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000010); break;
+                case ',':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000001); break;
+                case '.':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000001); break;
+                case ' ':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000000); break;
+            }
+        }
+        if (KeybModeText == 1)
+        {
+            switch (Temp[I])
+            {
+                case '1':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000000); break;
+                case '!':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000000); break;
+                case '2':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000001); break;
+                case '@':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000001); break;
+                case '3':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000010); break;
+                case '#':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000010); break;
+                case '4':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000011); break;
+                case '$':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000011); break;
+                case '5':                     LoadKeysVal(P, R, 0, (11 << 8) + b00000100); break;
+                case '%':                     LoadKeysVal(P, R, 1, (11 << 8) + b00000100); break;
+                // Numpad +
+                // Backspace
+
+                case 'Q':                     LoadKeysVal(P, R, 0, (10 << 8) + b00000000); break;
+                case 'q':                     LoadKeysVal(P, R, 1, (10 << 8) + b00000000); break;
+                case 'W':                     LoadKeysVal(P, R, 0, (10 << 8) + b00000001); break;
+                case 'w':                     LoadKeysVal(P, R, 1, (10 << 8) + b00000001); break;
+                case 'E':                     LoadKeysVal(P, R, 0, (10 << 8) + b00000010); break;
+                case 'e':                     LoadKeysVal(P, R, 1, (10 << 8) + b00000010); break;
+                case 'R':                     LoadKeysVal(P, R, 0, (10 << 8) + b00000011); break;
+                case 'r':                     LoadKeysVal(P, R, 1, (10 << 8) + b00000011); break;
+                case 'T':                     LoadKeysVal(P, R, 0, (10 << 8) + b00000100); break;
+                case 't':                     LoadKeysVal(P, R, 1, (10 << 8) + b00000100); break;
+                // Numpad -
+                // Tab
+
+                case 'A':                     LoadKeysVal(P, R, 0, ( 9 << 8) + b00000000); break;
+                case 'a':                     LoadKeysVal(P, R, 1, ( 9 << 8) + b00000000); break;
+                case 'S':                     LoadKeysVal(P, R, 0, ( 9 << 8) + b00000001); break;
+                case 's':                     LoadKeysVal(P, R, 1, ( 9 << 8) + b00000001); break;
+                case 'D':                     LoadKeysVal(P, R, 0, ( 9 << 8) + b00000010); break;
+                case 'd':                     LoadKeysVal(P, R, 1, ( 9 << 8) + b00000010); break;
+                case 'F':                     LoadKeysVal(P, R, 0, ( 9 << 8) + b00000011); break;
+                case 'f':                     LoadKeysVal(P, R, 1, ( 9 << 8) + b00000011); break;
+                case 'G':                     LoadKeysVal(P, R, 0, ( 9 << 8) + b00000100); break;
+                case 'g':                     LoadKeysVal(P, R, 1, ( 9 << 8) + b00000100); break;
+                // Numpad /
+                case '\\':                    LoadKeysVal(P, R, 0, ( 9 << 8) + b00000110); break;
+                case '|':                     LoadKeysVal(P, R, 1, ( 9 << 8) + b00000110); break;
+
+                // Shift
+                case 'Z':                     LoadKeysVal(P, R, 0, ( 8 << 8) + b00000001); break;
+                case 'z':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000001); break;
+                case 'X':                     LoadKeysVal(P, R, 0, ( 8 << 8) + b00000010); break;
+                case 'x':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000010); break;
+                case 'C':                     LoadKeysVal(P, R, 0, ( 8 << 8) + b00000011); break;
+                case 'c':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000011); break;
+                case 'V':                     LoadKeysVal(P, R, 0, ( 8 << 8) + b00000100); break;
+                case 'v':                     LoadKeysVal(P, R, 1, ( 8 << 8) + b00000100); break;
+                // Numpad *
+                // Caps
+
+
+                case '-':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000110); break;
+                case '_':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000110); break;
+                case '=':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000101); break;
+                case '+':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000101); break;
+                case '6':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000100); break;
+                case '^':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000100); break;
+                case '7':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000011); break;
+                case '&':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000011); break;
+                case '8':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000010); break;
+                case '*':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000010); break;
+                case '9':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000001); break;
+                case '(':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000001); break;
+                case '0':                     LoadKeysVal(P, R, 0, (12 << 8) + b00000000); break;
+                case ')':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000000); break;
+
+                case '[':                     LoadKeysVal(P, R, 0, (13 << 8) + b00000110); break;
+                case '{':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000110); break;
+                case ']':                     LoadKeysVal(P, R, 0, (13 << 8) + b00000101); break;
+                case '}':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000101); break;
+                case 'Y':                     LoadKeysVal(P, R, 0, (13 << 8) + b00000100); break;
+                case 'y':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000100); break;
+                case 'U':                     LoadKeysVal(P, R, 0, (13 << 8) + b00000011); break;
+                case 'u':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000011); break;
+                case 'I':                     LoadKeysVal(P, R, 0, (13 << 8) + b00000010); break;
+                case 'i':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000010); break;
+                case 'O':                     LoadKeysVal(P, R, 0, (13 << 8) + b00000001); break;
+                case 'o':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000001); break;
+                case 'P':                     LoadKeysVal(P, R, 0, (13 << 8) + b00000000); break;
+                case 'p':                     LoadKeysVal(P, R, 1, (13 << 8) + b00000000); break;
+
+                case ',':                     LoadKeysVal(P, R, 0, (14 << 8) + b00000110); break;
+                case '<':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000110); break;
+                case '.':                     LoadKeysVal(P, R, 0, (14 << 8) + b00000101); break;
+                case '>':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000101); break;
+                case 'H':                     LoadKeysVal(P, R, 0, (14 << 8) + b00000100); break;
+                case 'h':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000100); break;
+                case 'J':                     LoadKeysVal(P, R, 0, (14 << 8) + b00000011); break;
+                case 'j':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000011); break;
+                case 'K':                     LoadKeysVal(P, R, 0, (14 << 8) + b00000010); break;
+                case 'k':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000010); break;
+                case 'L':                     LoadKeysVal(P, R, 0, (14 << 8) + b00000001); break;
+                case 'l':                     LoadKeysVal(P, R, 1, (14 << 8) + b00000001); break;
+
+                case ';':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000110); break;
+                case ':':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000110); break;
+                case '\"':                    LoadKeysVal(P, R, 0, (15 << 8) + b00000101); break;
+                case '\'':                    LoadKeysVal(P, R, 1, (15 << 8) + b00000101); break;
+                case 'B':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000100); break;
+                case 'b':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000100); break;
+                case 'N':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000011); break;
+                case 'n':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000011); break;
+                case 'M':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
+                case 'm':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000010); break;
+                case '/':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000001); break;
+                case '?':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000001); break;
+                case ' ':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000000); break;
+            }
         }
     }
     if (M == 0)
     {
         SetCaps(C, true);
+    }
+
+    // Zwolnienie klawisza Shift
+    if (LoadKeysShiftState)
+    {
+        LoadKeysVal(0, 1, 0, ( 8 << 8) + b00000000);
+        LoadKeysShiftState = 0;
     }
 
     // Zlecenie przetworzenia wektora nacisniec klawiszy
@@ -535,58 +674,140 @@ void AppCore::SaveLastPath(QString X, bool OpenDir)
     }
 }
 
-void AppCore::keyPressEvent(QKeyEvent *event)
+void AppCore::KeyPressRelease(QKeyEvent *event, bool Press)
 {
     if (!event->isAutoRepeat())
     {
+        bool IsNumpad = false;
+        if (event->modifiers() & Qt::KeyboardModifier::KeypadModifier)
+        {
+            IsNumpad = true;
+        }
+
         if (KeybMode == 0)
         {
-            switch ((int)event->key())
+            //cout << "{" << (int)event->key() << "_" << Eden::IntToHex32(event->key()) << "}=[" << Eden::ToStr(event->text()) << "]" << IsNumpad << endl;
+
+            if (IsNumpad)
             {
-                case Qt::Key_1: case Qt::Key_Exclam: Keyboard_->KeyPress__(0, 11); break; // 1
-                case Qt::Key_2: case Qt::Key_At: Keyboard_->KeyPress__(1, 11); break; // 2
-                case Qt::Key_3: case Qt::Key_NumberSign: Keyboard_->KeyPress__(2, 11); break; // 3
-                case Qt::Key_4: case Qt::Key_Dollar: Keyboard_->KeyPress__(3, 11); break; // 4
-                case Qt::Key_5: case Qt::Key_Percent: Keyboard_->KeyPress__(4, 11); break; // 5
-                case Qt::Key_6: case Qt::Key_AsciiCircum: Keyboard_->KeyPress__(4, 12); break; // 6
-                case Qt::Key_7: case Qt::Key_Ampersand: Keyboard_->KeyPress__(3, 12); break; // 7
-                case Qt::Key_8: case Qt::Key_Asterisk: Keyboard_->KeyPress__(2, 12); break; // 8
-                case Qt::Key_9: case Qt::Key_ParenLeft: Keyboard_->KeyPress__(1, 12); break; // 9
-                case Qt::Key_0: case Qt::Key_ParenRight: Keyboard_->KeyPress__(0, 12); break; // 0
+                switch ((int)event->key())
+                {
+                    case Qt::Key_1:                Keyboard_->KeyInput(Press, 0, 11); break; // 1
+                    case Qt::Key_2:                Keyboard_->KeyInput(Press, 1, 11); break; // 2
+                    case Qt::Key_3:                Keyboard_->KeyInput(Press, 2, 11); break; // 3
+                    case Qt::Key_4:                Keyboard_->KeyInput(Press, 3, 11); break; // 4
+                    case Qt::Key_5:                Keyboard_->KeyInput(Press, 4, 11); break; // 5
 
-                case Qt::Key_Q: Keyboard_->KeyPress__(0, 10); break; // Q
-                case Qt::Key_W: Keyboard_->KeyPress__(1, 10); break; // W
-                case Qt::Key_E: Keyboard_->KeyPress__(2, 10); break; // E
-                case Qt::Key_R: Keyboard_->KeyPress__(3, 10); break; // R
-                case Qt::Key_T: Keyboard_->KeyPress__(4, 10); break; // T
-                case Qt::Key_Y: Keyboard_->KeyPress__(4, 13); break; // Y
-                case Qt::Key_U: Keyboard_->KeyPress__(3, 13); break; // U
-                case Qt::Key_I: Keyboard_->KeyPress__(2, 13); break; // I
-                case Qt::Key_O: Keyboard_->KeyPress__(1, 13); break; // O
-                case Qt::Key_P: Keyboard_->KeyPress__(0, 13); break; // P
+                    case Qt::Key_6:                Keyboard_->KeyInput(Press, 4, 12); break; // 6
+                    case Qt::Key_7:                Keyboard_->KeyInput(Press, 3, 12); break; // 7
+                    case Qt::Key_8:                Keyboard_->KeyInput(Press, 2, 12); break; // 8
+                    case Qt::Key_9:                Keyboard_->KeyInput(Press, 1, 12); break; // 9
+                    case Qt::Key_0:                Keyboard_->KeyInput(Press, 0, 12); break; // 0
 
-                case Qt::Key_A: Keyboard_->KeyPress__(0,  9); break; // A
-                case Qt::Key_S: Keyboard_->KeyPress__(1,  9); break; // S
-                case Qt::Key_D: Keyboard_->KeyPress__(2,  9); break; // D
-                case Qt::Key_F: Keyboard_->KeyPress__(3,  9); break; // F
-                case Qt::Key_G: Keyboard_->KeyPress__(4,  9); break; // G
-                case Qt::Key_H: Keyboard_->KeyPress__(4, 14); break; // H
-                case Qt::Key_J: Keyboard_->KeyPress__(3, 14); break; // J
-                case Qt::Key_K: Keyboard_->KeyPress__(2, 14); break; // K
-                case Qt::Key_L: Keyboard_->KeyPress__(1, 14); break; // L
-                case Qt::Key_Return: Keyboard_->KeyPress__(0, 14); break; // Enter
+                    case Qt::Key_Plus:             Keyboard_->KeyInput(Press, 5, 11); break; // +
+                    case Qt::Key_Minus:            Keyboard_->KeyInput(Press, 5, 10); break; // -
+                    case Qt::Key_Slash:            Keyboard_->KeyInput(Press, 5,  9); break; // /
+                    case Qt::Key_Asterisk:         Keyboard_->KeyInput(Press, 5,  8); break; // *
 
-                case Qt::Key_Shift: Keyboard_->KeyPress__(0,  8); break; // Shift
-                case Qt::Key_Z: Keyboard_->KeyPress__(1,  8); break; // Z
-                case Qt::Key_X: Keyboard_->KeyPress__(2,  8); break; // X
-                case Qt::Key_C: Keyboard_->KeyPress__(3,  8); break; // C
-                case Qt::Key_V: Keyboard_->KeyPress__(4,  8); break; // V
-                case Qt::Key_B: Keyboard_->KeyPress__(4, 15); break; // B
-                case Qt::Key_N: Keyboard_->KeyPress__(3, 15); break; // N
-                case Qt::Key_M: Keyboard_->KeyPress__(2, 15); break; // M
-                case Qt::Key_Comma:Keyboard_->KeyPress__(1, 15); break; // ,
-                case Qt::Key_Period:Keyboard_->KeyPress__(1, 15); break; // .
-                case Qt::Key_Space: Keyboard_->KeyPress__(0, 15); break; // Space
+                    case Qt::Key_Enter:            Keyboard_->KeyInput(Press, 0, 14); break; // Enter
+                    case Qt::Key_Return:           Keyboard_->KeyInput(Press, 0, 14); break; // Enter
+
+                    case Qt::Key_Period:           Keyboard_->KeyInput(Press, 1, 15); break; // .
+                    case Qt::Key_Comma:            Keyboard_->KeyInput(Press, 1, 15); break; // ,
+                }
+            }
+            else
+            {
+                switch ((int)event->key())
+                {
+                    case Qt::Key_1:                Keyboard_->KeyInput(Press, 0, 11); break; // 1
+                    case Qt::Key_Exclam:           Keyboard_->KeyInput(Press, 0, 11); break; // !
+                    case Qt::Key_2:                Keyboard_->KeyInput(Press, 1, 11); break; // 2
+                    case Qt::Key_At:               Keyboard_->KeyInput(Press, 1, 11); break; // @
+                    case Qt::Key_3:                Keyboard_->KeyInput(Press, 2, 11); break; // 3
+                    case Qt::Key_NumberSign:       Keyboard_->KeyInput(Press, 2, 11); break; // #
+                    case Qt::Key_4:                Keyboard_->KeyInput(Press, 3, 11); break; // 4
+                    case Qt::Key_Dollar:           Keyboard_->KeyInput(Press, 3, 11); break; // $
+                    case Qt::Key_5:                Keyboard_->KeyInput(Press, 4, 11); break; // 5
+                    case Qt::Key_Percent:          Keyboard_->KeyInput(Press, 4, 11); break; // %
+                    // (5, 11) - Numpad +
+                    case Qt::Key_Backspace:        Keyboard_->KeyInput(Press, 6, 11); break; // Backspace
+
+                    case Qt::Key_Minus:            Keyboard_->KeyInput(Press, 6, 12); break; // -
+                    case Qt::Key_Underscore:       Keyboard_->KeyInput(Press, 6, 12); break; // _
+                    case Qt::Key_Equal:            Keyboard_->KeyInput(Press, 5, 12); break; // =
+                    case Qt::Key_Plus:             Keyboard_->KeyInput(Press, 5, 12); break; // +
+                    case Qt::Key_6:                Keyboard_->KeyInput(Press, 4, 12); break; // 6
+                    case Qt::Key_AsciiCircum:      Keyboard_->KeyInput(Press, 4, 12); break; // ^
+                    case Qt::Key_7:                Keyboard_->KeyInput(Press, 3, 12); break; // 7
+                    case Qt::Key_Ampersand:        Keyboard_->KeyInput(Press, 3, 12); break; // &
+                    case Qt::Key_8:                Keyboard_->KeyInput(Press, 2, 12); break; // 8
+                    case Qt::Key_Asterisk:         Keyboard_->KeyInput(Press, 2, 12); break; // *
+                    case Qt::Key_9:                Keyboard_->KeyInput(Press, 1, 12); break; // 9
+                    case Qt::Key_ParenLeft:        Keyboard_->KeyInput(Press, 1, 12); break; // (
+                    case Qt::Key_0:                Keyboard_->KeyInput(Press, 0, 12); break; // 0
+                    case Qt::Key_ParenRight:       Keyboard_->KeyInput(Press, 0, 12); break; // )
+
+
+                    case Qt::Key_Q:                Keyboard_->KeyInput(Press, 0, 10); break; // Q
+                    case Qt::Key_W:                Keyboard_->KeyInput(Press, 1, 10); break; // W
+                    case Qt::Key_E:                Keyboard_->KeyInput(Press, 2, 10); break; // E
+                    case Qt::Key_R:                Keyboard_->KeyInput(Press, 3, 10); break; // R
+                    case Qt::Key_T:                Keyboard_->KeyInput(Press, 4, 10); break; // T
+                    // (5, 11) - Numpad -
+                    case Qt::Key_Tab:              Keyboard_->KeyInput(Press, 6, 10); break; // Tab
+
+                    case Qt::Key_BracketLeft:      Keyboard_->KeyInput(Press, 6, 13); break; // [
+                    case Qt::Key_BraceLeft:        Keyboard_->KeyInput(Press, 6, 13); break; // {
+                    case Qt::Key_BracketRight:     Keyboard_->KeyInput(Press, 5, 13); break; // ]
+                    case Qt::Key_BraceRight:       Keyboard_->KeyInput(Press, 5, 13); break; // }
+                    case Qt::Key_Y:                Keyboard_->KeyInput(Press, 4, 13); break; // Y
+                    case Qt::Key_U:                Keyboard_->KeyInput(Press, 3, 13); break; // U
+                    case Qt::Key_I:                Keyboard_->KeyInput(Press, 2, 13); break; // I
+                    case Qt::Key_O:                Keyboard_->KeyInput(Press, 1, 13); break; // O
+                    case Qt::Key_P:                Keyboard_->KeyInput(Press, 0, 13); break; // P
+
+
+                    case Qt::Key_A:                Keyboard_->KeyInput(Press, 0,  9); break; // A
+                    case Qt::Key_S:                Keyboard_->KeyInput(Press, 1,  9); break; // S
+                    case Qt::Key_D:                Keyboard_->KeyInput(Press, 2,  9); break; // D
+                    case Qt::Key_F:                Keyboard_->KeyInput(Press, 3,  9); break; // F
+                    case Qt::Key_G:                Keyboard_->KeyInput(Press, 4,  9); break; // G
+                    // (5, 11) - Numpad /
+                    case Qt::Key_Backslash:        Keyboard_->KeyInput(Press, 6,  9); break; // \ .
+                    case Qt::Key_Bar:              Keyboard_->KeyInput(Press, 6,  9); break; // |
+
+                    case Qt::Key_Less:             Keyboard_->KeyInput(Press, 6, 14); break; // <
+                    case Qt::Key_Comma:            Keyboard_->KeyInput(Press, 6, 14); break; // ,
+                    case Qt::Key_Greater:          Keyboard_->KeyInput(Press, 5, 14); break; // >
+                    case Qt::Key_Period:           Keyboard_->KeyInput(Press, 5, 14); break; // .
+                    case Qt::Key_H:                Keyboard_->KeyInput(Press, 4, 14); break; // H
+                    case Qt::Key_J:                Keyboard_->KeyInput(Press, 3, 14); break; // J
+                    case Qt::Key_K:                Keyboard_->KeyInput(Press, 2, 14); break; // K
+                    case Qt::Key_L:                Keyboard_->KeyInput(Press, 1, 14); break; // L
+                    case Qt::Key_Enter:            Keyboard_->KeyInput(Press, 0, 14); break; // Enter
+                    case Qt::Key_Return:           Keyboard_->KeyInput(Press, 0, 14); break; // Enter
+
+
+                    case Qt::Key_Shift:            Keyboard_->KeyInput(Press, 0,  8); break; // Shift
+                    case Qt::Key_Z:                Keyboard_->KeyInput(Press, 1,  8); break; // Z
+                    case Qt::Key_X:                Keyboard_->KeyInput(Press, 2,  8); break; // X
+                    case Qt::Key_C:                Keyboard_->KeyInput(Press, 3,  8); break; // C
+                    case Qt::Key_V:                Keyboard_->KeyInput(Press, 4,  8); break; // V
+                    // (5, 11) - Numpad *
+                    case Qt::Key_CapsLock:         Keyboard_->KeyInput(Press, 6,  8); break; // Caps
+
+                    case Qt::Key_Semicolon:        Keyboard_->KeyInput(Press, 6, 15); break; // ;
+                    case Qt::Key_Colon:            Keyboard_->KeyInput(Press, 6, 15); break; // :
+                    case Qt::Key_Apostrophe:       Keyboard_->KeyInput(Press, 5, 15); break; // '
+                    case Qt::Key_QuoteDbl:         Keyboard_->KeyInput(Press, 5, 15); break; // "
+                    case Qt::Key_B:                Keyboard_->KeyInput(Press, 4, 15); break; // B
+                    case Qt::Key_N:                Keyboard_->KeyInput(Press, 3, 15); break; // N
+                    case Qt::Key_M:                Keyboard_->KeyInput(Press, 2, 15); break; // M
+                    case Qt::Key_Slash:            Keyboard_->KeyInput(Press, 1, 15); break; // /
+                    case Qt::Key_Question:         Keyboard_->KeyInput(Press, 1, 15); break; // ?
+                    case Qt::Key_Space:            Keyboard_->KeyInput(Press, 0, 15); break; // Space
+                }
             }
         }
         if (KeybMode == 1)
@@ -595,27 +816,27 @@ void AppCore::keyPressEvent(QKeyEvent *event)
             switch ((int)event->key())
             {
                 case Qt::Key_Up: // Strzalka w gore
-                    LoadKeyStream(true, false, true, 1, (uchar*)"~U", 1);
+                    LoadKeyStream(Press, !Press, true, 1, (uchar*)"~U", 1);
                     TextKey = false;
                     break;
                 case Qt::Key_Down: // Strzalka w dol
-                    LoadKeyStream(true, false, true, 1, (uchar*)"~D", 1);
+                    LoadKeyStream(Press, !Press, true, 1, (uchar*)"~D", 1);
                     TextKey = false;
                     break;
                 case Qt::Key_Left: // Strzalka w lewo
-                    LoadKeyStream(true, false, true, 1, (uchar*)"~L", 1);
+                    LoadKeyStream(Press, !Press, true, 1, (uchar*)"~L", 1);
                     TextKey = false;
                     break;
                 case Qt::Key_Right: // Strzalka w prawo
-                    LoadKeyStream(true, false, true, 1, (uchar*)"~R", 1);
+                    LoadKeyStream(Press, !Press, true, 1, (uchar*)"~R", 1);
                     TextKey = false;
                     break;
                 case Qt::Key_Space: // Spacja
-                    LoadKeyStream(true, false, true, 1, (uchar*)" ", 1);
+                    LoadKeyStream(Press, !Press, true, 1, (uchar*)" ", 1);
                     TextKey = false;
                     break;
                 case Qt::Key_Return: // Enter
-                    LoadKeyStream(true, false, true, 1, (uchar*)"\n", 1);
+                    LoadKeyStream(Press, !Press, true, 1, (uchar*)"\n", 1);
                     TextKey = false;
                     break;
                 case Qt::Key_Shift: // Shift
@@ -629,119 +850,39 @@ void AppCore::keyPressEvent(QKeyEvent *event)
                 {
                     if ((KeyChar[0] >= 33) && ((KeyChar[0] <= 126)))
                     {
-                        //cout << "PRESS " << (int)KeyChar[0] << endl;
-                        LoadKeyStream(true, false, true, 1, (uchar*)KeyChar.c_str(), 1);
+                        //if (Press)
+                        //{
+                        //    cout << "PRESS " << (int)KeyChar[0] << endl;
+                        //}
+                        //else
+                        //{
+                        //    cout << "RELEASE " << (int)KeyChar[0] << endl;
+                        //}
+                        LoadKeyStream(Press, !Press, true, 1, (uchar*)KeyChar.c_str(), 1);
                     }
                 }
             }
             //switch (event->text())
             //{
             //}
-            //cout << "PRESS " << Eden::ToStr((int)event->key()) << "  " << Eden::ToStr(event->text()) << endl;
+            //if (Press)
+            //{
+            //    cout << "PRESS " << Eden::ToStr((int)event->key()) << "  " << Eden::ToStr(event->text()) << endl;
+            //}
+            //else
+            //{
+            //    cout << "RELEASE " << Eden::ToStr((int)event->key()) << "  " << Eden::ToStr(event->text()) << endl;
+            //}
         }
     }
 }
 
+void AppCore::keyPressEvent(QKeyEvent *event)
+{
+    KeyPressRelease(event, true);
+}
+
 void AppCore::keyReleaseEvent(QKeyEvent *event)
 {
-    if (!event->isAutoRepeat())
-    {
-        if (KeybMode == 0)
-        {
-            switch ((int)event->key())
-            {
-                case Qt::Key_1: case Qt::Key_Exclam: Keyboard_->KeyRelease(0, 11); break; // 1
-                case Qt::Key_2: case Qt::Key_At: Keyboard_->KeyRelease(1, 11); break; // 2
-                case Qt::Key_3: case Qt::Key_NumberSign: Keyboard_->KeyRelease(2, 11); break; // 3
-                case Qt::Key_4: case Qt::Key_Dollar: Keyboard_->KeyRelease(3, 11); break; // 4
-                case Qt::Key_5: case Qt::Key_Percent: Keyboard_->KeyRelease(4, 11); break; // 5
-                case Qt::Key_6: case Qt::Key_AsciiCircum: Keyboard_->KeyRelease(4, 12); break; // 6
-                case Qt::Key_7: case Qt::Key_Ampersand: Keyboard_->KeyRelease(3, 12); break; // 7
-                case Qt::Key_8: case Qt::Key_Asterisk: Keyboard_->KeyRelease(2, 12); break; // 8
-                case Qt::Key_9: case Qt::Key_ParenLeft: Keyboard_->KeyRelease(1, 12); break; // 9
-                case Qt::Key_0: case Qt::Key_ParenRight: Keyboard_->KeyRelease(0, 12); break; // 0
-
-                case Qt::Key_Q: Keyboard_->KeyRelease(0, 10); break; // Q
-                case Qt::Key_W: Keyboard_->KeyRelease(1, 10); break; // W
-                case Qt::Key_E: Keyboard_->KeyRelease(2, 10); break; // E
-                case Qt::Key_R: Keyboard_->KeyRelease(3, 10); break; // R
-                case Qt::Key_T: Keyboard_->KeyRelease(4, 10); break; // T
-                case Qt::Key_Y: Keyboard_->KeyRelease(4, 13); break; // Y
-                case Qt::Key_U: Keyboard_->KeyRelease(3, 13); break; // U
-                case Qt::Key_I: Keyboard_->KeyRelease(2, 13); break; // I
-                case Qt::Key_O: Keyboard_->KeyRelease(1, 13); break; // O
-                case Qt::Key_P: Keyboard_->KeyRelease(0, 13); break; // P
-
-                case Qt::Key_A: Keyboard_->KeyRelease(0,  9); break; // A
-                case Qt::Key_S: Keyboard_->KeyRelease(1,  9); break; // S
-                case Qt::Key_D: Keyboard_->KeyRelease(2,  9); break; // D
-                case Qt::Key_F: Keyboard_->KeyRelease(3,  9); break; // F
-                case Qt::Key_G: Keyboard_->KeyRelease(4,  9); break; // G
-                case Qt::Key_H: Keyboard_->KeyRelease(4, 14); break; // H
-                case Qt::Key_J: Keyboard_->KeyRelease(3, 14); break; // J
-                case Qt::Key_K: Keyboard_->KeyRelease(2, 14); break; // K
-                case Qt::Key_L: Keyboard_->KeyRelease(1, 14); break; // L
-                case Qt::Key_Return: Keyboard_->KeyRelease(0, 14); break; // Enter
-
-                case Qt::Key_Shift: Keyboard_->KeyRelease(0,  8); break; // Shift
-                case Qt::Key_Z: Keyboard_->KeyRelease(1,  8); break; // Z
-                case Qt::Key_X: Keyboard_->KeyRelease(2,  8); break; // X
-                case Qt::Key_C: Keyboard_->KeyRelease(3,  8); break; // C
-                case Qt::Key_V: Keyboard_->KeyRelease(4,  8); break; // V
-                case Qt::Key_B: Keyboard_->KeyRelease(4, 15); break; // B
-                case Qt::Key_N: Keyboard_->KeyRelease(3, 15); break; // N
-                case Qt::Key_M: Keyboard_->KeyRelease(2, 15); break; // M
-                case Qt::Key_Comma:Keyboard_->KeyRelease(1, 15); break; // ,
-                case Qt::Key_Period:Keyboard_->KeyRelease(1, 15); break; // .
-                case Qt::Key_Space: Keyboard_->KeyRelease(0, 15); break; // Space
-            }
-        }
-        if (KeybMode == 1)
-        {
-            bool TextKey = true;
-            switch ((int)event->key())
-            {
-                case Qt::Key_Up: // Strzalka w gore
-                    LoadKeyStream(false, true, true, 1, (uchar*)"~U", 1);
-                    TextKey = false;
-                    break;
-                case Qt::Key_Down: // Strzalka w dol
-                    LoadKeyStream(false, true, true, 1, (uchar*)"~D", 1);
-                    TextKey = false;
-                    break;
-                case Qt::Key_Left: // Strzalka w lewo
-                    LoadKeyStream(false, true, true, 1, (uchar*)"~L", 1);
-                    TextKey = false;
-                    break;
-                case Qt::Key_Right: // Strzalka w prawo
-                    LoadKeyStream(false, true, true, 1, (uchar*)"~R", 1);
-                    TextKey = false;
-                    break;
-                case Qt::Key_Space: // Spacja
-                    LoadKeyStream(false, true, true, 1, (uchar*)" ", 1);
-                    TextKey = false;
-                    break;
-                case Qt::Key_Return: // Enter
-                    LoadKeyStream(false, true, true, 1, (uchar*)"\n", 1);
-                    TextKey = false;
-                    break;
-                case Qt::Key_Shift: // Shift
-                    TextKey = false;
-                    break; // Shift
-            }
-            if (TextKey)
-            {
-                string KeyChar = Eden::ToStr(event->text());
-                if (KeyChar.size() > 0)
-                {
-                    if ((KeyChar[0] >= 33) && ((KeyChar[0] <= 126)))
-                    {
-                        //cout << "RELEASE " << (int)KeyChar[0] << endl;
-                        LoadKeyStream(false, true, true, 1, (uchar*)KeyChar.c_str(), 1);
-                    }
-                }
-            }
-            //cout << "RELEASE " << Eden::ToStr((int)event->key()) << "  " << Eden::ToStr(event->text()) << endl;
-        }
-    }
+    KeyPressRelease(event, false);
 }

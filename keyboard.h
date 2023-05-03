@@ -11,9 +11,8 @@ class Keyboard
 public:
     Keyboard();
     ~Keyboard();
-    void KeyPress__(int D, int A);
-    void KeyRelease(int D, int A);
-    char KeyState[5][16];
+    void KeyInput(bool Press, int D, int A);
+    char KeyState[8][16];
     void SetAddr(char Addr);
     uchar GetState(uchar ALines);
     vector<int> * KeyStrokes;

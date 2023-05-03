@@ -11,6 +11,9 @@ Keyboard::Keyboard()
         KeyState[2][I] = 0;
         KeyState[3][I] = 0;
         KeyState[4][I] = 0;
+        KeyState[5][I] = 0;
+        KeyState[6][I] = 0;
+        KeyState[7][I] = 0;
     }
 }
 
@@ -19,14 +22,18 @@ Keyboard::~Keyboard()
     delete KeyStrokes;
 }
 
-void Keyboard::KeyPress__(int D, int A)
+void Keyboard::KeyInput(bool Press, int D, int A)
 {
-    KeyState[D][A] = 1;
-}
-
-void Keyboard::KeyRelease(int D, int A)
-{
-    KeyState[D][A] = 0;
+    if (Press)
+    {
+        //cout << "Dn  " << D << "," << A << endl;
+        KeyState[D][A] = 1;
+    }
+    else
+    {
+        //cout << "Up  " << D << "," << A << endl;
+        KeyState[D][A] = 0;
+    }
 }
 
 void Keyboard::SetAddr(char Addr)
@@ -48,6 +55,9 @@ uchar Keyboard::GetState(uchar ALines)
             if (KeyState[2][AL]) { X &= b11111011; }
             if (KeyState[3][AL]) { X &= b11110111; }
             if (KeyState[4][AL]) { X &= b11101111; }
+            if (KeyState[5][AL]) { X &= b11011111; }
+            if (KeyState[6][AL]) { X &= b10111111; }
+            if (KeyState[7][AL]) { X &= b01111111; }
         }
 
         AL++;
@@ -109,11 +119,11 @@ void Keyboard::Clock()
                 KeyStrokeTimeCounter = KeyStrokeTime;
                 if ((KeyStrokes->at(KeyStrokeCounter) & b11000000) == b10000000)
                 {
-                    KeyRelease(KeyStrokes->at(KeyStrokeCounter) & b01111111, KeyStrokes->at(KeyStrokeCounter) >> 8);
+                    KeyInput(false, KeyStrokes->at(KeyStrokeCounter) & b01111111, KeyStrokes->at(KeyStrokeCounter) >> 8);
                 }
                 if ((KeyStrokes->at(KeyStrokeCounter) & b11000000) == b00000000)
                 {
-                    KeyPress__(KeyStrokes->at(KeyStrokeCounter) & b01111111, KeyStrokes->at(KeyStrokeCounter) >> 8);
+                    KeyInput(true,  KeyStrokes->at(KeyStrokeCounter) & b01111111, KeyStrokes->at(KeyStrokeCounter) >> 8);
                 }
             }
             else

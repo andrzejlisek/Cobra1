@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ScreenKeyb_ = new ScreenKeyb();
     ScreenKeyb_->Core = Core;
+    ScreenKeyb_->Init();
 
     HelpSettings_ = new HelpSettings();
     HelpSettings_->Core = Core;
