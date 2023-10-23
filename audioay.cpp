@@ -68,11 +68,8 @@ void AudioAY::SetRegV(uchar V)
     int V_ = V;
 
     //cout << "R" << RegN << " = " << (int)V << "   " << Eden::IntToHex8(V) << endl;
-    //bool SoundGen = IsSoundGeneration();
 
     bool GenRestart = false;
-    int OldValueI;
-    bool OldValueB;
 
     switch (RegN)
     {
@@ -80,26 +77,23 @@ void AudioAY::SetRegV(uchar V)
         case 2: // Kanal B - dolny
         case 4: // Kanal C - dolny
             Temp = ChannelPeriod[RegN >> 1];
-            OldValueI = Temp;
             Temp = Temp & 0xFF00;
             Temp = Temp + V_;
             ChannelPeriod[RegN >> 1] = Temp;
-            if (OldValueI != Temp) GenRestart = true;
+            GenRestart = true;
             break;
         case 1: // Kanal A - gorny
         case 3: // Kanal B - gorny
         case 5: // Kanal C - gorny
             Temp = ChannelPeriod[(RegN - 1) >> 1];
-            OldValueI = Temp;
             Temp = Temp & 0x00FF;
             Temp = Temp + (((V_) & 0x0F) << 8);
             ChannelPeriod[(RegN - 1) >> 1] = Temp;
-            if (OldValueI != Temp) GenRestart = true;
+            GenRestart = true;
             break;
         case 6: // Szum
-            OldValueI = ChannelPeriod[3];
             ChannelPeriod[3] = V_ % b00011111;
-            if (OldValueI != ChannelPeriod[3]) GenRestart = true;
+            GenRestart = true;
             break;
         case 7: // Sterowanie
             ChannelTone[0] = ((V_ & b00000001) == 0);
@@ -113,30 +107,26 @@ void AudioAY::SetRegV(uchar V)
         case 9: // Kanal B - glosnosc
         case 10: // Kanal C - glosnosc
             ChannelVolume[RegN - 8] = V_ & 0x0F;
-            OldValueB = ChannelUseEnvelope[RegN - 8];
             ChannelUseEnvelope[RegN - 8] = V_ & b00010000;
-            if (OldValueB != ChannelUseEnvelope[RegN - 8]) GenRestart = true;
+            GenRestart = true;
             break;
         case 11: // Obwiednia - dolny
             Temp = EnvelopePeriod;
-            OldValueI = Temp;
             Temp = Temp & 0xFF00;
             Temp = Temp + V_;
             EnvelopePeriod = Temp;
-            if (OldValueI != Temp) GenRestart = true;
+            GenRestart = true;
             break;
         case 12: // Obwiednia - gorny
             Temp = EnvelopePeriod;
-            OldValueI = Temp;
             Temp = Temp & 0x00FF;
             Temp = Temp + (V_ << 8);
             EnvelopePeriod = Temp;
-            if (OldValueI != Temp) GenRestart = true;
+            GenRestart = true;
             break;
         case 13: // Rodzaj obwiedni
-            OldValueI = EnvelopeType;
             EnvelopeType = V_ & 0x0F;
-            if (OldValueI != EnvelopeType) GenRestart = true;
+            GenRestart = true;
             break;
     }
 
@@ -261,17 +251,7 @@ void AudioAY::SetRegV(uchar V)
         }
     }
 
-    // Jezeli AY nie wytwarzal dzwieku, ale po zmianie rejestru powinien go wytwarzac,
-    // nalezy zresetowac generator obwiedni
-    //bool SoundGenX = IsSoundGeneration();
-
-    //cout << "Sprawdzanie stanu " << SoundGen << " " << SoundGenX << endl;
-    //if ((!SoundGen) && (SoundGenX))
-    //{
-    //    EnvelopeCounter = 0;
-    //    EnvelopeState = 0;
-    //}
-
+    // Restart generatora obwiedni
     if (GenRestart)
     {
         EnvelopeCounter = 0;
