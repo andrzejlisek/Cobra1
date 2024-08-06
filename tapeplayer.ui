@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>468</width>
-    <height>511</height>
+    <height>601</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -211,89 +211,129 @@
       <string>Pamięć</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="MemRomL">
-        <property name="text">
-         <string>Obraz pamięci ROM:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="MemRomT">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="MemRomB">
+      <item row="4" column="3">
+       <widget class="QPushButton" name="Disk0B">
         <property name="text">
          <string>Wybierz plik</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="MemLstL">
-        <property name="text">
-         <string>Lista banków ROM:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="MemLstT">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="MemLstB">
-        <property name="text">
-         <string>Wybierz plik</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="MemChrL">
-        <property name="text">
-         <string>Obraz generatora znaków:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="MemChrT">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
+      <item row="2" column="3">
        <widget class="QPushButton" name="MemChrB">
         <property name="text">
          <string>Wybierz plik</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="MemRamL">
+      <item row="5" column="2">
+       <widget class="QLineEdit" name="Disk1T"/>
+      </item>
+      <item row="5" column="3">
+       <widget class="QPushButton" name="Disk1B">
         <property name="text">
-         <string>Wstępna zawartość RAM:</string>
+         <string>Wybierz plik</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="MemRamT">
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="Disk0T"/>
+      </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="MemRamB">
+        <property name="text">
+         <string>Wybierz plik</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="MemRomB">
+        <property name="text">
+         <string>Wybierz plik</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="MemLstT">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="MemRomT">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QPushButton" name="MemRamB">
+       <widget class="QLineEdit" name="MemRamT">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="Disk1L">
+        <property name="text">
+         <string>Dysk ATA slave:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="MemLstB">
         <property name="text">
          <string>Wybierz plik</string>
         </property>
        </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="Disk0L">
+        <property name="text">
+         <string>Dysk ATA master:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="MemChrT">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="Disk0SectorT"/>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="MemRamL">
+        <property name="text">
+         <string>Wstępna zawartość RAM:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="MemChrL">
+        <property name="text">
+         <string>Obraz generatora znaków:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="MemLstL">
+        <property name="text">
+         <string>Lista banków ROM:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="MemRomL">
+        <property name="text">
+         <string>Obraz pamięci ROM:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="Disk1SectorT"/>
       </item>
      </layout>
     </widget>

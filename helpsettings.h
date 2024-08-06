@@ -56,6 +56,10 @@ private slots:
 
     void on_DebugReg4_toggled(bool checked);
 
+    void on_DebugTraceRange1T_textChanged(const QString &arg1);
+
+    void on_DebugTraceRange2T_textChanged(const QString &arg1);
+
 private:
     Ui::HelpSettings *ui;
 };

@@ -38,6 +38,20 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::showEvent(QShowEvent *event)
+{
+    for (int I = 0; I < Params.size(); I++)
+    {
+        //cout << "{" << Params[I] << "}" << endl;
+        if (Params[I] == "autostart")
+        {
+            setWindowTitle("Cobra 1 (pracuje)");
+            SoundStart();
+            Core->CpuMem_->ProgStart(0);
+        }
+    }
+}
+
 void MainWindow::ShowMessage(string Message, string Title)
 {
     QMessageBox Msg;

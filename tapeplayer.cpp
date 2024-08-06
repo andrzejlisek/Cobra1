@@ -140,6 +140,11 @@ void TapePlayer::Init()
     ui->MemChrT->setText(Eden::ToQStr(Core->FileChr));
     ui->MemRamT->setText(Eden::ToQStr(Core->FileRam));
 
+    ui->Disk0T->setText(Eden::ToQStr(Core->AtaDisk_->Disk0Name));
+    ui->Disk1T->setText(Eden::ToQStr(Core->AtaDisk_->Disk1Name));
+    ui->Disk0SectorT->setText(Eden::ToQStr(Core->AtaDisk_->Disk0Sector));
+    ui->Disk1SectorT->setText(Eden::ToQStr(Core->AtaDisk_->Disk1Sector));
+
     EventEnabled = true;
 }
 
@@ -158,6 +163,11 @@ void TapePlayer::SetParams()
         Core->FileLst = Eden::ToStr(ui->MemLstT->text());
         Core->FileChr = Eden::ToStr(ui->MemChrT->text());
         Core->FileRam = Eden::ToStr(ui->MemRamT->text());
+
+        Core->AtaDisk_->Disk0Name = Eden::ToStr(ui->Disk0T->text());
+        Core->AtaDisk_->Disk1Name = Eden::ToStr(ui->Disk1T->text());
+        Core->AtaDisk_->Disk0Sector = Eden::ToInt(ui->Disk0SectorT->text());
+        Core->AtaDisk_->Disk1Sector = Eden::ToInt(ui->Disk1SectorT->text());
     }
 }
 
@@ -250,6 +260,38 @@ void TapePlayer::on_SetSavePulseLengthT_textChanged(const QString &arg1)
 }
 
 void TapePlayer::on_SetSaveInvertTimeT_textChanged(const QString &arg1)
+{
+    SetParams();
+}
+
+void TapePlayer::on_Disk0B_clicked()
+{
+    ui->Disk0T->setText(SelectFile(ui->Disk0T->text()));
+    SetParams();
+}
+
+void TapePlayer::on_Disk0T_textChanged(const QString &arg1)
+{
+    SetParams();
+}
+
+void TapePlayer::on_Disk1T_textChanged(const QString &arg1)
+{
+    SetParams();
+}
+
+void TapePlayer::on_Disk1B_clicked()
+{
+    ui->Disk0T->setText(SelectFile(ui->Disk0T->text()));
+    SetParams();
+}
+
+void TapePlayer::on_Disk0SectorT_textChanged(const QString &arg1)
+{
+    SetParams();
+}
+
+void TapePlayer::on_Disk1SectorT_textChanged(const QString &arg1)
 {
     SetParams();
 }

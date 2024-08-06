@@ -30,6 +30,8 @@ void HelpSettings::Init()
     ui->DebugReg2->setChecked(Core->CpuMem_->DebugReg2);
     ui->DebugReg3->setChecked(Core->CpuMem_->DebugReg3);
     ui->DebugReg4->setChecked(Core->CpuMem_->DebugReg4);
+    ui->DebugTraceRange1T->setText(Eden::ToQStr(Eden::IntToHex16(Core->CpuMem_->DebugTraceRange1)));
+    ui->DebugTraceRange2T->setText(Eden::ToQStr(Eden::IntToHex16(Core->CpuMem_->DebugTraceRange2)));
     ui->AudioAYFreqT->setText(Eden::ToQStr(Core->AudioAY_->ChipClock));
     ui->InterruptPeriodT->setText(Eden::ToQStr(Core->CpuMem_->InterruptPeriod));
 
@@ -130,4 +132,14 @@ void HelpSettings::on_InterruptPeriodT_textChanged(const QString &arg1)
 void HelpSettings::on_DebugReg4_toggled(bool checked)
 {
     Core->CpuMem_->DebugReg4 = checked;
+}
+
+void HelpSettings::on_DebugTraceRange1T_textChanged(const QString &arg1)
+{
+    Core->CpuMem_->DebugTraceRange1 = Eden::HexToInt(Eden::ToStr(arg1));
+}
+
+void HelpSettings::on_DebugTraceRange2T_textChanged(const QString &arg1)
+{
+    Core->CpuMem_->DebugTraceRange2 = Eden::HexToInt(Eden::ToStr(arg1));
 }

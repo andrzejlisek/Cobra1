@@ -75,6 +75,18 @@ private slots:
 
     void on_SetSaveInvertTimeT_textChanged(const QString &arg1);
 
+    void on_Disk0B_clicked();
+
+    void on_Disk0T_textChanged(const QString &arg1);
+
+    void on_Disk1T_textChanged(const QString &arg1);
+
+    void on_Disk1B_clicked();
+
+    void on_Disk0SectorT_textChanged(const QString &arg1);
+
+    void on_Disk1SectorT_textChanged(const QString &arg1);
+
 private:
     Ui::TapePlayer *ui;
     void SetParams();

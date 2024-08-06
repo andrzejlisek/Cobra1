@@ -19,8 +19,14 @@ void CpuMem::LoadRom(string AppDir, string RomFile, string LstFile, string RamFi
     // Losowanie pamieci
     for (int I = 0; I < 65536; I++)
     {
-        Mem[I] = rand() % 256;
-        //Mem[I] = 0;
+        if (InitRandom)
+        {
+            Mem[I] = rand() % 256;
+        }
+        else
+        {
+            Mem[I] = 0;
+        }
     }
 
     // Wczytanie listy zawartosci ROM
@@ -117,7 +123,6 @@ void CpuMem::SoundReset()
         I--;
     }
     SoundBuf.push(0);
-    Printer = 1;
     SoundSignal = false;
     SoundLevel1 = 0;
     SoundLevel2 = 0;
@@ -399,600 +404,611 @@ void CpuMem::ProgramWork(bool OneStep)
 
                 if (DebugTraceX)
                 {
-                    stringstream SS;
-
-                    int Reg_PC_Addr = Reg_PC;
-
-                    if ((Reg_PC_Addr < 0xC000) || (Reg_PC_Addr >= RomSize1[RomNo]))
+                    if ((Reg_PC >= DebugTraceRange1) && (Reg_PC <= DebugTraceRange2))
                     {
-                        SS << "__:" << Eden::IntToHex16(Reg_PC_Addr);
+                        stringstream SS;
 
-                        Reg_PC_Addr = -66000 + Reg_PC_Addr;
-                    }
-                    else
-                    {
-                        SS << Eden::IntToHex8(RomNo) << ":" << Eden::IntToHex16(Reg_PC_Addr);
+                        int Reg_PC_Addr = Reg_PC;
 
-                        Reg_PC_Addr = (RomNo << 8) + Reg_PC_Addr;
-                    }
-
-                    int CommandSize = 0;
-
-
-
-                    {
-                        string RegName = "";
-                        string CommandDataNN = "____h";
-                        string CommandDataN = "__h";
-                        string CommandDataD = "__h";
-                        string CommandLabel = "_____";
-                        uchar OpCode3 = 0;
-                        uchar OpCode4 = 0;
-
-                        SS << "  ";
-                        if (Reg_PC < 65535) { OpCode1 = MemGet(Reg_PC + 1); } else { OpCode1 = 0; }
-                        if (Reg_PC < 65534) { OpCode2 = MemGet(Reg_PC + 2); } else { OpCode2 = 0; }
-                        if (Reg_PC < 65533) { OpCode3 = MemGet(Reg_PC + 3); } else { OpCode3 = 0; }
-                        if (Reg_PC < 65532) { OpCode4 = MemGet(Reg_PC + 4); } else { OpCode4 = 0; }
-
-                        CommandDataNN = Eden::IntToHex8(OpCode2) + Eden::IntToHex8(OpCode1) + "h";
-                        CommandDataN = Eden::IntToHex8(OpCode1) + "h";
-                        int CommandJumpAddr = Reg_PC + 2 + OpCode1;
-                        if (OpCode1 > 127)
+                        if ((Reg_PC_Addr < 0xC000) || (Reg_PC_Addr >= RomSize1[RomNo]))
                         {
-                            CommandJumpAddr -= 256;
-                        }
-                        CommandLabel = "_" + Eden::IntToHex16(CommandJumpAddr);
+                            SS << "__:" << Eden::IntToHex16(Reg_PC_Addr);
 
-                        switch (OpCode0)
-                        {
-                            case 0x00: CommandSize = 1; SS << "NOP               "; break;
-                            case 0x76: CommandSize = 1; SS << "HALT              "; break;
-                            case 0x27: CommandSize = 1; SS << "DA A              "; break;
-                            case 0x08: CommandSize = 1; SS << "EX AF, AF'        "; break;
-                            case 0xD9: CommandSize = 1; SS << "EXX               "; break;
-                            case 0xE3: CommandSize = 1; SS << "EX (SP), HL       "; break;
-                            case 0xEB: CommandSize = 1; SS << "EX DE, HL         "; break;
-                            case 0xF3: CommandSize = 1; SS << "DI                "; break;
-                            case 0xFB: CommandSize = 1; SS << "EI                "; break;
-                            case 0x01: CommandSize = 3; SS << "LD BC, " << CommandDataNN << "      "; break;
-                            case 0x11: CommandSize = 3; SS << "LD DE, " << CommandDataNN << "      "; break;
-                            case 0x21: CommandSize = 3; SS << "LD HL, " << CommandDataNN << "      "; break;
-                            case 0x31: CommandSize = 3; SS << "LD SP, " << CommandDataNN << "      "; break;
-                            case 0x22: CommandSize = 3; SS << "LD (" << CommandDataNN << "), HL    "; break;
-                            case 0x02: CommandSize = 1; SS << "LD (BC), A        "; break;
-                            case 0x12: CommandSize = 1; SS << "LD (DE), A        "; break;
-                            case 0x32: CommandSize = 3; SS << "LD (" << CommandDataNN << "), A     "; break;
-                            case 0x3A: CommandSize = 3; SS << "LD A, (" << CommandDataNN << ")     "; break;
-                            case 0x36: CommandSize = 2; SS << "LD (HL), " << CommandDataN << "      "; break;
-                            case 0x0A: CommandSize = 1; SS << "LD A, (BC)        "; break;
-                            case 0x1A: CommandSize = 1; SS << "LD A, (DE)        "; break;
-                            case 0x06: CommandSize = 2; SS << "LD B, " << CommandDataN << "         "; break;
-                            case 0x0E: CommandSize = 2; SS << "LD C, " << CommandDataN << "         "; break;
-                            case 0x16: CommandSize = 2; SS << "LD D, " << CommandDataN << "         "; break;
-                            case 0x1E: CommandSize = 2; SS << "LD E, " << CommandDataN << "         "; break;
-                            case 0x26: CommandSize = 2; SS << "LD H, " << CommandDataN << "         "; break;
-                            case 0x2A: CommandSize = 3; SS << "LD HL, (" << CommandDataNN << ")    "; break;
-                            case 0x2E: CommandSize = 2; SS << "LD L, " << CommandDataN << "         "; break;
-                            case 0x3E: CommandSize = 2; SS << "LD A, " << CommandDataN << "         "; break;
-                            case 0xF9: CommandSize = 1; SS << "LD SP, HL         "; break;
-                            case 0x07: CommandSize = 1; SS << "RLC A             "; break;
-                            case 0x0F: CommandSize = 1; SS << "RRC A             "; break;
-                            case 0x17: CommandSize = 1; SS << "RL A              "; break;
-                            case 0x1F: CommandSize = 1; SS << "RR A              "; break;
-                            case 0x03: CommandSize = 1; SS << "INC BC            "; break;
-                            case 0x13: CommandSize = 1; SS << "INC DE            "; break;
-                            case 0x23: CommandSize = 1; SS << "INC HL            "; break;
-                            case 0x33: CommandSize = 1; SS << "INC SP            "; break;
-                            case 0x0B: CommandSize = 1; SS << "DEC BC            "; break;
-                            case 0x1B: CommandSize = 1; SS << "DEC DE            "; break;
-                            case 0x2B: CommandSize = 1; SS << "DEC HL            "; break;
-                            case 0x3B: CommandSize = 1; SS << "DEC SP            "; break;
-                            case 0x04: CommandSize = 1; SS << "INC B             "; break;
-                            case 0x05: CommandSize = 1; SS << "DEC B             "; break;
-                            case 0x0C: CommandSize = 1; SS << "INC C             "; break;
-                            case 0x0D: CommandSize = 1; SS << "DEC C             "; break;
-                            case 0x14: CommandSize = 1; SS << "INC D             "; break;
-                            case 0x15: CommandSize = 1; SS << "DEC D             "; break;
-                            case 0x1C: CommandSize = 1; SS << "INC E             "; break;
-                            case 0x1D: CommandSize = 1; SS << "DEC E             "; break;
-                            case 0x24: CommandSize = 1; SS << "INC H             "; break;
-                            case 0x25: CommandSize = 1; SS << "DEC H             "; break;
-                            case 0x2C: CommandSize = 1; SS << "INC L             "; break;
-                            case 0x2D: CommandSize = 1; SS << "DEC L             "; break;
-                            case 0x34: CommandSize = 1; SS << "INC (HL)          "; break;
-                            case 0x35: CommandSize = 1; SS << "DEC (HL)          "; break;
-                            case 0x3C: CommandSize = 1; SS << "INC A             "; break;
-                            case 0x3D: CommandSize = 1; SS << "DEC A             "; break;
-                            case 0x09: CommandSize = 1; SS << "ADD HL, BC        "; break;
-                            case 0x19: CommandSize = 1; SS << "ADD HL, DE        "; break;
-                            case 0x29: CommandSize = 1; SS << "ADD HL, HL        "; break;
-                            case 0x39: CommandSize = 1; SS << "ADD HL, SP        "; break;
-                            case 0xC6: CommandSize = 2; SS << "ADD A, " << CommandDataN << "        "; break;
-                            case 0xCE: CommandSize = 2; SS << "ADC A, " << CommandDataN << "        "; break;
-                            case 0xD6: CommandSize = 2; SS << "SUB " << CommandDataN << "           "; break;
-                            case 0xDE: CommandSize = 2; SS << "SBC A, " << CommandDataN << "        "; break;
-                            case 0x2F: CommandSize = 1; SS << "CPL               "; break;
-                            case 0x37: CommandSize = 1; SS << "SCF               "; break;
-                            case 0x3F: CommandSize = 1; SS << "CCF               "; break;
-                            case 0xE6: CommandSize = 2; SS << "AND " << CommandDataN << "           "; break;
-                            case 0xEE: CommandSize = 2; SS << "XOR " << CommandDataN << "           "; break;
-                            case 0xF6: CommandSize = 2; SS << "OR " << CommandDataN << "            "; break;
-                            case 0xFE: CommandSize = 2; SS << "CP " << CommandDataN << "            "; break;
-                            case 0x10: CommandSize = 2; SS << "DJNZ " << CommandLabel << "        "; break;
-                            case 0x18: CommandSize = 2; SS << "JR " << CommandLabel << "          "; break;
-                            case 0x20: CommandSize = 2; SS << "JR NZ, " << CommandLabel << "      "; break;
-                            case 0x28: CommandSize = 2; SS << "JR Z, " << CommandLabel << "       "; break;
-                            case 0x30: CommandSize = 2; SS << "JR NC, " << CommandLabel << "      "; break;
-                            case 0x38: CommandSize = 2; SS << "JR C, " << CommandLabel << "       "; break;
-                            case 0xC3: CommandSize = 3; SS << "JP " << CommandDataNN << "          "; break;
-                            case 0xE9: CommandSize = 1; SS << "JP (HL)           "; break;
-                            case 0xC2: CommandSize = 3; SS << "JP NZ, " << CommandDataNN << "      "; break;
-                            case 0xCA: CommandSize = 3; SS << "JP Z, " << CommandDataNN << "       "; break;
-                            case 0xD2: CommandSize = 3; SS << "JP NC, " << CommandDataNN << "      "; break;
-                            case 0xDA: CommandSize = 3; SS << "JP C, " << CommandDataNN << "       "; break;
-                            case 0xE2: CommandSize = 3; SS << "JP PO, " << CommandDataNN << "      "; break;
-                            case 0xEA: CommandSize = 3; SS << "JP PE, " << CommandDataNN << "      "; break;
-                            case 0xF2: CommandSize = 3; SS << "JP P, " << CommandDataNN << "       "; break;
-                            case 0xFA: CommandSize = 3; SS << "JP M, " << CommandDataNN << "       "; break;
-                            case 0x40: CommandSize = 1; SS << "LD B, B           "; break;
-                            case 0x41: CommandSize = 1; SS << "LD B, C           "; break;
-                            case 0x42: CommandSize = 1; SS << "LD B, D           "; break;
-                            case 0x43: CommandSize = 1; SS << "LD B, E           "; break;
-                            case 0x44: CommandSize = 1; SS << "LD B, H           "; break;
-                            case 0x45: CommandSize = 1; SS << "LD B, L           "; break;
-                            case 0x46: CommandSize = 1; SS << "LD B, (HL)        "; break;
-                            case 0x47: CommandSize = 1; SS << "LD B, A           "; break;
-                            case 0x48: CommandSize = 1; SS << "LD C, B           "; break;
-                            case 0x49: CommandSize = 1; SS << "LD C, C           "; break;
-                            case 0x4A: CommandSize = 1; SS << "LD C, D           "; break;
-                            case 0x4B: CommandSize = 1; SS << "LD C, E           "; break;
-                            case 0x4C: CommandSize = 1; SS << "LD C, H           "; break;
-                            case 0x4D: CommandSize = 1; SS << "LD C, L           "; break;
-                            case 0x4E: CommandSize = 1; SS << "LD C, (HL)        "; break;
-                            case 0x4F: CommandSize = 1; SS << "LD C, A           "; break;
-                            case 0x50: CommandSize = 1; SS << "LD D, B           "; break;
-                            case 0x51: CommandSize = 1; SS << "LD D, C           "; break;
-                            case 0x52: CommandSize = 1; SS << "LD D, D           "; break;
-                            case 0x53: CommandSize = 1; SS << "LD D, E           "; break;
-                            case 0x54: CommandSize = 1; SS << "LD D, H           "; break;
-                            case 0x55: CommandSize = 1; SS << "LD D, L           "; break;
-                            case 0x56: CommandSize = 1; SS << "LD D, (HL)        "; break;
-                            case 0x57: CommandSize = 1; SS << "LD D, A           "; break;
-                            case 0x58: CommandSize = 1; SS << "LD E, B           "; break;
-                            case 0x59: CommandSize = 1; SS << "LD E, C           "; break;
-                            case 0x5A: CommandSize = 1; SS << "LD E, D           "; break;
-                            case 0x5B: CommandSize = 1; SS << "LD E, E           "; break;
-                            case 0x5C: CommandSize = 1; SS << "LD E, H           "; break;
-                            case 0x5D: CommandSize = 1; SS << "LD E, L           "; break;
-                            case 0x5E: CommandSize = 1; SS << "LD E, (HL)        "; break;
-                            case 0x5F: CommandSize = 1; SS << "LD E, A           "; break;
-                            case 0x60: CommandSize = 1; SS << "LD H, B           "; break;
-                            case 0x61: CommandSize = 1; SS << "LD H, C           "; break;
-                            case 0x62: CommandSize = 1; SS << "LD H, D           "; break;
-                            case 0x63: CommandSize = 1; SS << "LD H, E           "; break;
-                            case 0x64: CommandSize = 1; SS << "LD H, H           "; break;
-                            case 0x65: CommandSize = 1; SS << "LD H, L           "; break;
-                            case 0x66: CommandSize = 1; SS << "LD H, (HL)        "; break;
-                            case 0x67: CommandSize = 1; SS << "LD H, A           "; break;
-                            case 0x68: CommandSize = 1; SS << "LD L, B           "; break;
-                            case 0x69: CommandSize = 1; SS << "LD L, C           "; break;
-                            case 0x6A: CommandSize = 1; SS << "LD L, D           "; break;
-                            case 0x6B: CommandSize = 1; SS << "LD L, E           "; break;
-                            case 0x6C: CommandSize = 1; SS << "LD L, H           "; break;
-                            case 0x6D: CommandSize = 1; SS << "LD L, L           "; break;
-                            case 0x6E: CommandSize = 1; SS << "LD L, (HL)        "; break;
-                            case 0x6F: CommandSize = 1; SS << "LD L, A           "; break;
-                            case 0x70: CommandSize = 1; SS << "LD (HL), B        "; break;
-                            case 0x71: CommandSize = 1; SS << "LD (HL), C        "; break;
-                            case 0x72: CommandSize = 1; SS << "LD (HL), D        "; break;
-                            case 0x73: CommandSize = 1; SS << "LD (HL), E        "; break;
-                            case 0x74: CommandSize = 1; SS << "LD (HL), H        "; break;
-                            case 0x75: CommandSize = 1; SS << "LD (HL), L        "; break;
-                            case 0x77: CommandSize = 1; SS << "LD (HL), A        "; break;
-                            case 0x78: CommandSize = 1; SS << "LD A, B           "; break;
-                            case 0x79: CommandSize = 1; SS << "LD A, C           "; break;
-                            case 0x7A: CommandSize = 1; SS << "LD A, D           "; break;
-                            case 0x7B: CommandSize = 1; SS << "LD A, E           "; break;
-                            case 0x7C: CommandSize = 1; SS << "LD A, H           "; break;
-                            case 0x7D: CommandSize = 1; SS << "LD A, L           "; break;
-                            case 0x7E: CommandSize = 1; SS << "LD A, (HL)        "; break;
-                            case 0x7F: CommandSize = 1; SS << "LD A, A           "; break;
-                            case 0x80: CommandSize = 1; SS << "ADD A, B          "; break;
-                            case 0x81: CommandSize = 1; SS << "ADD A, C          "; break;
-                            case 0x82: CommandSize = 1; SS << "ADD A, D          "; break;
-                            case 0x83: CommandSize = 1; SS << "ADD A, E          "; break;
-                            case 0x84: CommandSize = 1; SS << "ADD A, H          "; break;
-                            case 0x85: CommandSize = 1; SS << "ADD A, L          "; break;
-                            case 0x86: CommandSize = 1; SS << "ADD A, (HL)       "; break;
-                            case 0x87: CommandSize = 1; SS << "ADD A, A          "; break;
-                            case 0x88: CommandSize = 1; SS << "ADC A, B          "; break;
-                            case 0x89: CommandSize = 1; SS << "ADC A, C          "; break;
-                            case 0x8A: CommandSize = 1; SS << "ADC A, D          "; break;
-                            case 0x8B: CommandSize = 1; SS << "ADC A, E          "; break;
-                            case 0x8C: CommandSize = 1; SS << "ADC A, H          "; break;
-                            case 0x8D: CommandSize = 1; SS << "ADC A, L          "; break;
-                            case 0x8E: CommandSize = 1; SS << "ADC A, (HL)       "; break;
-                            case 0x8F: CommandSize = 1; SS << "ADC A, A          "; break;
-                            case 0x90: CommandSize = 1; SS << "SUB B             "; break;
-                            case 0x91: CommandSize = 1; SS << "SUB C             "; break;
-                            case 0x92: CommandSize = 1; SS << "SUB D             "; break;
-                            case 0x93: CommandSize = 1; SS << "SUB E             "; break;
-                            case 0x94: CommandSize = 1; SS << "SUB H             "; break;
-                            case 0x95: CommandSize = 1; SS << "SUB L             "; break;
-                            case 0x96: CommandSize = 1; SS << "SUB (HL)          "; break;
-                            case 0x97: CommandSize = 1; SS << "SUB A             "; break;
-                            case 0x98: CommandSize = 1; SS << "SBC A, B          "; break;
-                            case 0x99: CommandSize = 1; SS << "SBC A, C          "; break;
-                            case 0x9A: CommandSize = 1; SS << "SBC A, D          "; break;
-                            case 0x9B: CommandSize = 1; SS << "SBC A, E          "; break;
-                            case 0x9C: CommandSize = 1; SS << "SBC A, H          "; break;
-                            case 0x9D: CommandSize = 1; SS << "SBC A, L          "; break;
-                            case 0x9E: CommandSize = 1; SS << "SBC A, (HL)       "; break;
-                            case 0x9F: CommandSize = 1; SS << "SBC A, A          "; break;
-                            case 0xA0: CommandSize = 1; SS << "AND B             "; break;
-                            case 0xA1: CommandSize = 1; SS << "AND C             "; break;
-                            case 0xA2: CommandSize = 1; SS << "AND D             "; break;
-                            case 0xA3: CommandSize = 1; SS << "AND E             "; break;
-                            case 0xA4: CommandSize = 1; SS << "AND H             "; break;
-                            case 0xA5: CommandSize = 1; SS << "AND L             "; break;
-                            case 0xA6: CommandSize = 1; SS << "AND (HL)          "; break;
-                            case 0xA7: CommandSize = 1; SS << "AND A             "; break;
-                            case 0xA8: CommandSize = 1; SS << "XOR B             "; break;
-                            case 0xA9: CommandSize = 1; SS << "XOR C             "; break;
-                            case 0xAA: CommandSize = 1; SS << "XOR D             "; break;
-                            case 0xAB: CommandSize = 1; SS << "XOR E             "; break;
-                            case 0xAC: CommandSize = 1; SS << "XOR H             "; break;
-                            case 0xAD: CommandSize = 1; SS << "XOR L             "; break;
-                            case 0xAE: CommandSize = 1; SS << "XOR (HL)          "; break;
-                            case 0xAF: CommandSize = 1; SS << "XOR A             "; break;
-                            case 0xB0: CommandSize = 1; SS << "OR B              "; break;
-                            case 0xB1: CommandSize = 1; SS << "OR C              "; break;
-                            case 0xB2: CommandSize = 1; SS << "OR D              "; break;
-                            case 0xB3: CommandSize = 1; SS << "OR E              "; break;
-                            case 0xB4: CommandSize = 1; SS << "OR H              "; break;
-                            case 0xB5: CommandSize = 1; SS << "OR L              "; break;
-                            case 0xB6: CommandSize = 1; SS << "OR (HL)           "; break;
-                            case 0xB7: CommandSize = 1; SS << "OR A              "; break;
-                            case 0xB8: CommandSize = 1; SS << "CP B              "; break;
-                            case 0xB9: CommandSize = 1; SS << "CP C              "; break;
-                            case 0xBA: CommandSize = 1; SS << "CP D              "; break;
-                            case 0xBB: CommandSize = 1; SS << "CP E              "; break;
-                            case 0xBC: CommandSize = 1; SS << "CP H              "; break;
-                            case 0xBD: CommandSize = 1; SS << "CP L              "; break;
-                            case 0xBE: CommandSize = 1; SS << "CP (HL)           "; break;
-                            case 0xBF: CommandSize = 1; SS << "CP A              "; break;
-                            case 0xC1: CommandSize = 1; SS << "POP BC            "; break;
-                            case 0xC5: CommandSize = 1; SS << "PUSH BC           "; break;
-                            case 0xD1: CommandSize = 1; SS << "POP DE            "; break;
-                            case 0xD5: CommandSize = 1; SS << "PUSH DE           "; break;
-                            case 0xE1: CommandSize = 1; SS << "POP HL            "; break;
-                            case 0xE5: CommandSize = 1; SS << "PUSH HL           "; break;
-                            case 0xF1: CommandSize = 1; SS << "POP AF            "; break;
-                            case 0xF5: CommandSize = 1; SS << "PUSH AF           "; break;
-                            case 0xCD: CommandSize = 3; SS << "CALL " << CommandDataNN << "        "; break;
-                            case 0xC4: CommandSize = 3; SS << "CALL NZ " << CommandDataNN << "     "; break;
-                            case 0xCC: CommandSize = 3; SS << "CALL Z, " << CommandDataNN << "     "; break;
-                            case 0xD4: CommandSize = 3; SS << "CALL NC, " << CommandDataNN << "    "; break;
-                            case 0xDC: CommandSize = 3; SS << "CALL C, " << CommandDataNN << "     "; break;
-                            case 0xE4: CommandSize = 3; SS << "CALL PO, " << CommandDataNN << "    "; break;
-                            case 0xEC: CommandSize = 3; SS << "CALL PE, " << CommandDataNN << "    "; break;
-                            case 0xF4: CommandSize = 3; SS << "CALL P, " << CommandDataNN << "     "; break;
-                            case 0xFC: CommandSize = 3; SS << "CALL M, " << CommandDataNN << "     "; break;
-                            case 0xC7: CommandSize = 1; SS << "RST 00            "; break;
-                            case 0xCF: CommandSize = 1; SS << "RST 08            "; break;
-                            case 0xD7: CommandSize = 1; SS << "RST 10            "; break;
-                            case 0xDF: CommandSize = 1; SS << "RST 18            "; break;
-                            case 0xE7: CommandSize = 1; SS << "RST 20            "; break;
-                            case 0xEF: CommandSize = 1; SS << "RST 28            "; break;
-                            case 0xF7: CommandSize = 1; SS << "RST 30            "; break;
-                            case 0xFF: CommandSize = 1; SS << "RST 38            "; break;
-                            case 0xC9: CommandSize = 1; SS << "RET               "; break;
-                            case 0xC0: CommandSize = 1; SS << "RET NZ            "; break;
-                            case 0xC8: CommandSize = 1; SS << "RET Z             "; break;
-                            case 0xD0: CommandSize = 1; SS << "RET NC            "; break;
-                            case 0xD8: CommandSize = 1; SS << "RET C             "; break;
-                            case 0xE0: CommandSize = 1; SS << "RET PO            "; break;
-                            case 0xE8: CommandSize = 1; SS << "RET PE            "; break;
-                            case 0xF0: CommandSize = 1; SS << "RET P             "; break;
-                            case 0xF8: CommandSize = 1; SS << "RET M             "; break;
-                            case 0xD3: CommandSize = 2; SS << "OUT (" << CommandDataN << "), A      "; break;
-                            case 0xDB: CommandSize = 2; SS << "IN A, (" << CommandDataN << ")       "; break;
-
-                            // Rozkazy CB - rozkazy na pojedynczym rejestrze lub bajcie pod adresem HL
-                            case 0xCB:
-
-                                switch (OpCode1 & b00000111)
-                                {
-                                    case 0: RegName = "B   "; break;
-                                    case 1: RegName = "C   "; break;
-                                    case 2: RegName = "D   "; break;
-                                    case 3: RegName = "E   "; break;
-                                    case 4: RegName = "H   "; break;
-                                    case 5: RegName = "L   "; break;
-                                    case 6: RegName = "(HL)"; break;
-                                    case 7: RegName = "A   "; break;
-                                }
-
-                                switch (OpCode1 & b11111000)
-                                {
-                                    case 0x00: CommandSize = 2; SS << "RLC " << RegName << "          "; break;
-                                    case 0x08: CommandSize = 2; SS << "RRC " << RegName << "          "; break;
-                                    case 0x10: CommandSize = 2; SS << "RL " << RegName << "           "; break;
-                                    case 0x18: CommandSize = 2; SS << "RR " << RegName << "           "; break;
-                                    case 0x20: CommandSize = 2; SS << "SLA " << RegName << "          "; break;
-                                    case 0x28: CommandSize = 2; SS << "SRA " << RegName << "          "; break;
-                                    case 0x38: CommandSize = 2; SS << "SRL " << RegName << "          "; break;
-                                    case 0x40: CommandSize = 2; SS << "BIT 0, " << RegName << "       "; break;
-                                    case 0x48: CommandSize = 2; SS << "BIT 1, " << RegName << "       "; break;
-                                    case 0x50: CommandSize = 2; SS << "BIT 2, " << RegName << "       "; break;
-                                    case 0x58: CommandSize = 2; SS << "BIT 3, " << RegName << "       "; break;
-                                    case 0x60: CommandSize = 2; SS << "BIT 4, " << RegName << "       "; break;
-                                    case 0x68: CommandSize = 2; SS << "BIT 5, " << RegName << "       "; break;
-                                    case 0x70: CommandSize = 2; SS << "BIT 6, " << RegName << "       "; break;
-                                    case 0x78: CommandSize = 2; SS << "BIT 7, " << RegName << "       "; break;
-                                    case 0x80: CommandSize = 2; SS << "RES 0, " << RegName << "       "; break;
-                                    case 0x88: CommandSize = 2; SS << "RES 1, " << RegName << "       "; break;
-                                    case 0x90: CommandSize = 2; SS << "RES 2, " << RegName << "       "; break;
-                                    case 0x98: CommandSize = 2; SS << "RES 3, " << RegName << "       "; break;
-                                    case 0xA0: CommandSize = 2; SS << "RES 4, " << RegName << "       "; break;
-                                    case 0xA8: CommandSize = 2; SS << "RES 5, " << RegName << "       "; break;
-                                    case 0xB0: CommandSize = 2; SS << "RES 6, " << RegName << "       "; break;
-                                    case 0xB8: CommandSize = 2; SS << "RES 7, " << RegName << "       "; break;
-                                    case 0xC0: CommandSize = 2; SS << "SET 0, " << RegName << "       "; break;
-                                    case 0xC8: CommandSize = 2; SS << "SET 1, " << RegName << "       "; break;
-                                    case 0xD0: CommandSize = 2; SS << "SET 2, " << RegName << "       "; break;
-                                    case 0xD8: CommandSize = 2; SS << "SET 3, " << RegName << "       "; break;
-                                    case 0xE0: CommandSize = 2; SS << "SET 4, " << RegName << "       "; break;
-                                    case 0xE8: CommandSize = 2; SS << "SET 5, " << RegName << "       "; break;
-                                    case 0xF0: CommandSize = 2; SS << "SET 6, " << RegName << "       "; break;
-                                    case 0xF8: CommandSize = 2; SS << "SET 7, " << RegName << "       "; break;
-                                    default:   CommandSize = 2; SS << "UNKNOWN           "; break;
-                                }
-
-
-                                break;
-                            case 0xDD: // Rozkazy DD - rozkazy wykorzystujace rejestr IX
-                            case 0xFD: // Rozkazy ED - rozkazy wykorzystujace rejestr IY
-                                if (OpCode0 == 0xDD)
-                                {
-                                    RegName = "IX";
-                                }
-                                else
-                                {
-                                    RegName = "IY";
-                                }
-                                CommandDataNN = Eden::IntToHex8(OpCode3) + Eden::IntToHex8(OpCode2) + "h";
-                                CommandDataN = Eden::IntToHex8(OpCode3) + "h";
-                                CommandDataD = Eden::IntToHex8(OpCode2) + "h";
-
-                                switch (OpCode1)
-                                {
-                                    case 0x09: CommandSize = 2; SS << "ADD " << RegName << ", BC        "; break;
-                                    case 0x19: CommandSize = 2; SS << "ADD " << RegName << ", DE        "; break;
-                                    case 0x29: CommandSize = 2; SS << "ADD " << RegName << ", " << RegName << "        "; break;
-                                    case 0x39: CommandSize = 2; SS << "ADD " << RegName << ", SP        "; break;
-                                    case 0x23: CommandSize = 2; SS << "INC " << RegName << "            "; break;
-                                    case 0x2B: CommandSize = 2; SS << "DEC " << RegName << "            "; break;
-                                    case 0x34: CommandSize = 3; SS << "INC (" << RegName << " + " << CommandDataD << ")    "; break;
-                                    case 0x35: CommandSize = 3; SS << "DEC (" << RegName << " + " << CommandDataD << ")    "; break;
-                                    case 0x21: CommandSize = 4; SS << "LD " << RegName << ", " << CommandDataNN << "      "; break;
-                                    case 0x22: CommandSize = 4; SS << "LD (" << CommandDataNN << "), " << RegName << "    "; break;
-                                    case 0x2A: CommandSize = 4; SS << "LD " << RegName << ", (" << CommandDataNN << ")    "; break;
-                                    case 0xF9: CommandSize = 2; SS << "LD SP, " << RegName << "         "; break;
-                                    case 0x36: CommandSize = 4; SS << "LD (" << RegName << " + " << CommandDataD << "), " << CommandDataN << ""; break;
-                                    case 0x46: CommandSize = 3; SS << "LD B, (" << RegName << " + " << CommandDataD << ")  "; break;
-                                    case 0x4E: CommandSize = 3; SS << "LD C, (" << RegName << " + " << CommandDataD << ")  "; break;
-                                    case 0x56: CommandSize = 3; SS << "LD D, (" << RegName << " + " << CommandDataD << ")  "; break;
-                                    case 0x5E: CommandSize = 3; SS << "LD E, (" << RegName << " + " << CommandDataD << ")  "; break;
-                                    case 0x66: CommandSize = 3; SS << "LD H, (" << RegName << " + " << CommandDataD << ")  "; break;
-                                    case 0x6E: CommandSize = 3; SS << "LD L, (" << RegName << " + " << CommandDataD << ")  "; break;
-                                    case 0x7E: CommandSize = 3; SS << "LD A, (" << RegName << " + " << CommandDataD << ")  "; break;
-                                    case 0x70: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), B  "; break;
-                                    case 0x71: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), C  "; break;
-                                    case 0x72: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), D  "; break;
-                                    case 0x73: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), E  "; break;
-                                    case 0x74: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), H  "; break;
-                                    case 0x75: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), L  "; break;
-                                    case 0x77: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), A  "; break;
-                                    case 0x86: CommandSize = 3; SS << "ADD A, (" << RegName << " + " << CommandDataD << ") "; break;
-                                    case 0x8E: CommandSize = 3; SS << "ADC A, (" << RegName << " + " << CommandDataD << ") "; break;
-                                    case 0x96: CommandSize = 3; SS << "SUB, (" << RegName << " + " << CommandDataD << ")   "; break;
-                                    case 0x9E: CommandSize = 3; SS << "SBC A, (" << RegName << " + " << CommandDataD << ") "; break;
-                                    case 0xA6: CommandSize = 3; SS << "AND, (" << RegName << " + " << CommandDataD << ")   "; break;
-                                    case 0xAE: CommandSize = 3; SS << "XOR, (" << RegName << " + " << CommandDataD << ")   "; break;
-                                    case 0xB6: CommandSize = 3; SS << "OR, (" << RegName << " + " << CommandDataD << ")    "; break;
-                                    case 0xBE: CommandSize = 3; SS << "CP, (" << RegName << " + " << CommandDataD << ")    "; break;
-                                    case 0xE3: CommandSize = 2; SS << "EX (SP), " << RegName << "       "; break;
-                                    case 0xE1: CommandSize = 2; SS << "POP " << RegName << "            "; break;
-                                    case 0xE5: CommandSize = 2; SS << "PUSH " << RegName << "           "; break;
-                                    case 0xE9: CommandSize = 2; SS << "JP (" << RegName << ")           "; break;
-
-                                    case 0xCB: // Rozkazy CB
-                                        CommandDataD = Eden::IntToHex8(OpCode2) + "h";
-                                        switch (OpCode3)
-                                        {
-                                            case 0x06: CommandSize = 4; SS << "RLC (" << RegName << " + " << CommandDataD << ")    "; break;
-                                            case 0x0E: CommandSize = 4; SS << "RRC (" << RegName << " + " << CommandDataD << ")    "; break;
-                                            case 0x16: CommandSize = 4; SS << "RL (" << RegName << " + " << CommandDataD << ")     "; break;
-                                            case 0x1E: CommandSize = 4; SS << "RR (" << RegName << " + " << CommandDataD << ")     "; break;
-                                            case 0x26: CommandSize = 4; SS << "SLA (" << RegName << " + " << CommandDataD << ")    "; break;
-                                            case 0x2E: CommandSize = 4; SS << "SRA (" << RegName << " + " << CommandDataD << ")    "; break;
-                                            case 0x3E: CommandSize = 4; SS << "SRL (" << RegName << " + " << CommandDataD << ")    "; break;
-                                            case 0x46: CommandSize = 4; SS << "BIT 0, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x4E: CommandSize = 4; SS << "BIT 1, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x56: CommandSize = 4; SS << "BIT 2, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x5E: CommandSize = 4; SS << "BIT 3, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x66: CommandSize = 4; SS << "BIT 4, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x6E: CommandSize = 4; SS << "BIT 5, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x76: CommandSize = 4; SS << "BIT 6, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x7E: CommandSize = 4; SS << "BIT 7, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x86: CommandSize = 4; SS << "RES 0, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x8E: CommandSize = 4; SS << "RES 1, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x96: CommandSize = 4; SS << "RES 2, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0x9E: CommandSize = 4; SS << "RES 3, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xA6: CommandSize = 4; SS << "RES 4, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xAE: CommandSize = 4; SS << "RES 5, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xB6: CommandSize = 4; SS << "RES 6, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xBE: CommandSize = 4; SS << "RES 7, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xC6: CommandSize = 4; SS << "SET 0, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xCE: CommandSize = 4; SS << "SET 1, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xD6: CommandSize = 4; SS << "SET 2, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xDE: CommandSize = 4; SS << "SET 3, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xE6: CommandSize = 4; SS << "SET 4, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xEE: CommandSize = 4; SS << "SET 5, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xF6: CommandSize = 4; SS << "SET 6, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            case 0xFE: CommandSize = 4; SS << "SET 7, (" << RegName << " + " << CommandDataD << ") "; break;
-                                            default:   CommandSize = 4; SS << "UNKNOWN           "; break;
-                                        }
-                                        break;
-
-                                    default:   CommandSize = 2; SS << "UNKNOWN           "; break;
-                                }
-
-                                break;
-                            case 0xED: // Rozkazy ED
-                                CommandDataNN = Eden::IntToHex8(OpCode3) + Eden::IntToHex8(OpCode2) + "h";
-                                switch (OpCode1)
-                                {
-                                    case 0x40: CommandSize = 2; SS << "IN B, (C)         "; break;
-                                    case 0x48: CommandSize = 2; SS << "IN C, (C)         "; break;
-                                    case 0x50: CommandSize = 2; SS << "IN D, (C)         "; break;
-                                    case 0x58: CommandSize = 2; SS << "IN E, (C)         "; break;
-                                    case 0x60: CommandSize = 2; SS << "IN H, (C)         "; break;
-                                    case 0x68: CommandSize = 2; SS << "IN L, (C)         "; break;
-                                    case 0x78: CommandSize = 2; SS << "IN A, (C)         "; break;
-                                    case 0x41: CommandSize = 2; SS << "OUT (C), B        "; break;
-                                    case 0x49: CommandSize = 2; SS << "OUT (C), C        "; break;
-                                    case 0x51: CommandSize = 2; SS << "OUT (C), D        "; break;
-                                    case 0x59: CommandSize = 2; SS << "OUT (C), E        "; break;
-                                    case 0x61: CommandSize = 2; SS << "OUT (C), H        "; break;
-                                    case 0x69: CommandSize = 2; SS << "OUT (C), L        "; break;
-                                    case 0x79: CommandSize = 2; SS << "OUT (C), A        "; break;
-                                    case 0x46: CommandSize = 2; SS << "IM 0              "; break;
-                                    case 0x56: CommandSize = 2; SS << "IM 1              "; break;
-                                    case 0x5E: CommandSize = 2; SS << "IM 2              "; break;
-                                    case 0x45: CommandSize = 2; SS << "RETN              "; break;
-                                    case 0x4D: CommandSize = 2; SS << "RETI              "; break;
-                                    case 0x47: CommandSize = 2; SS << "LD I, A           "; break;
-                                    case 0x4F: CommandSize = 2; SS << "LD R, A           "; break;
-                                    case 0x57: CommandSize = 2; SS << "LD A, I           "; break;
-                                    case 0x5F: CommandSize = 2; SS << "LD A, R           "; break;
-                                    case 0x43: CommandSize = 4; SS << "LD (" << CommandDataNN << "), BC    "; break;
-                                    case 0x53: CommandSize = 4; SS << "LD (" << CommandDataNN << "), DE    "; break;
-                                    case 0x63: CommandSize = 4; SS << "LD (" << CommandDataNN << "), HL    "; break;
-                                    case 0x73: CommandSize = 4; SS << "LD (" << CommandDataNN << "), SP    "; break;
-                                    case 0x4B: CommandSize = 4; SS << "LD BC, (" << CommandDataNN << ")    "; break;
-                                    case 0x5B: CommandSize = 4; SS << "LD DE, (" << CommandDataNN << ")    "; break;
-                                    case 0x6B: CommandSize = 4; SS << "LD HL, (" << CommandDataNN << ")    "; break;
-                                    case 0x7B: CommandSize = 4; SS << "LD SP, (" << CommandDataNN << ")    "; break;
-                                    case 0x44: CommandSize = 2; SS << "NEG               "; break;
-                                    case 0x67: CommandSize = 2; SS << "RRD               "; break;
-                                    case 0x6F: CommandSize = 2; SS << "RLD               "; break;
-                                    case 0x4A: CommandSize = 2; SS << "ADC HL, BC        "; break;
-                                    case 0x5A: CommandSize = 2; SS << "ADC HL, DE        "; break;
-                                    case 0x6A: CommandSize = 2; SS << "ADC HL, HL        "; break;
-                                    case 0x7A: CommandSize = 2; SS << "ADC HL, SP        "; break;
-                                    case 0x42: CommandSize = 2; SS << "SBC HL, BC        "; break;
-                                    case 0x52: CommandSize = 2; SS << "SBC HL, DE        "; break;
-                                    case 0x62: CommandSize = 2; SS << "SBC HL, HL        "; break;
-                                    case 0x72: CommandSize = 2; SS << "SBC HL, SP        "; break;
-                                    case 0xA0: CommandSize = 2; SS << "LDI               "; break;
-                                    case 0xA8: CommandSize = 2; SS << "LDD               "; break;
-                                    case 0xB0: CommandSize = 2; SS << "LDIR              "; break;
-                                    case 0xB8: CommandSize = 2; SS << "LDDR              "; break;
-                                    case 0xA1: CommandSize = 2; SS << "CPI               "; break;
-                                    case 0xA9: CommandSize = 2; SS << "CPD               "; break;
-                                    case 0xB1: CommandSize = 2; SS << "CPIR              "; break;
-                                    case 0xB9: CommandSize = 2; SS << "CPDR              "; break;
-                                    case 0xA2: CommandSize = 2; SS << "INI               "; break;
-                                    case 0xAA: CommandSize = 2; SS << "IND               "; break;
-                                    case 0xB2: CommandSize = 2; SS << "INIR              "; break;
-                                    case 0xBA: CommandSize = 2; SS << "INDR              "; break;
-                                    case 0xA3: CommandSize = 2; SS << "OUTI              "; break;
-                                    case 0xAB: CommandSize = 2; SS << "OUTD              "; break;
-                                    case 0xB3: CommandSize = 2; SS << "OTIR              "; break;
-                                    case 0xBB: CommandSize = 2; SS << "OTDR              "; break;
-                                    default:   CommandSize = 2; SS << "UNKNOWN           "; break;
-                                }
-                                break;
-
-
-                            default:   CommandSize = 1; SS << "UNKNOWN           "; break;
-                        }
-                        SS << "  ";
-                    }
-
-
-                    if (DebugReg0X)
-                    {
-                        if (CommandSize >= 1)
-                        {
-                            SS << "  " + Eden::IntToHex8(OpCode0);
+                            Reg_PC_Addr = -66000 + Reg_PC_Addr;
                         }
                         else
                         {
-                            SS << "    ";
+                            SS << Eden::IntToHex8(RomNo) << ":" << Eden::IntToHex16(Reg_PC_Addr);
+
+                            Reg_PC_Addr = (RomNo << 8) + Reg_PC_Addr;
                         }
-                        if ((CommandSize >= 2) && (Reg_PC < 65535)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 1)); } else { SS << "   "; }
-                        if ((CommandSize >= 3) && (Reg_PC < 65534)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 2)); } else { SS << "   "; }
-                        if ((CommandSize >= 4) && (Reg_PC < 65533)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 3)); } else { SS << "   "; }
-                        if ((CommandSize >= 5) && (Reg_PC < 65532)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 4)); } else { SS << "   "; }
-                        if ((CommandSize >= 6) && (Reg_PC < 65531)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 5)); } else { SS << "   "; }
-                        if ((CommandSize >= 7) && (Reg_PC < 65530)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 6)); } else { SS << "   "; }
-                        if ((CommandSize >= 8) && (Reg_PC < 65529)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 7)); } else { SS << "   "; }
+
+                        int CommandSize = 0;
+
+
+
+                        {
+                            string RegName = "";
+                            string CommandDataNN = "____h";
+                            string CommandDataN = "__h";
+                            string CommandDataD = "__h";
+                            string CommandLabel = "_____";
+                            uchar OpCode3 = 0;
+                            uchar OpCode4 = 0;
+
+                            SS << "  ";
+                            if (Reg_PC < 65535) { OpCode1 = MemGet(Reg_PC + 1); } else { OpCode1 = 0; }
+                            if (Reg_PC < 65534) { OpCode2 = MemGet(Reg_PC + 2); } else { OpCode2 = 0; }
+                            if (Reg_PC < 65533) { OpCode3 = MemGet(Reg_PC + 3); } else { OpCode3 = 0; }
+                            if (Reg_PC < 65532) { OpCode4 = MemGet(Reg_PC + 4); } else { OpCode4 = 0; }
+
+                            CommandDataNN = Eden::IntToHex8(OpCode2) + Eden::IntToHex8(OpCode1) + "h";
+                            CommandDataN = Eden::IntToHex8(OpCode1) + "h";
+                            int CommandJumpAddr = Reg_PC + 2 + OpCode1;
+                            if (OpCode1 > 127)
+                            {
+                                CommandJumpAddr -= 256;
+                            }
+                            CommandLabel = "_" + Eden::IntToHex16(CommandJumpAddr);
+
+                            switch (OpCode0)
+                            {
+                                case 0x00: CommandSize = 1; SS << "NOP               "; break;
+                                case 0x76: CommandSize = 1; SS << "HALT              "; break;
+                                case 0x27: CommandSize = 1; SS << "DA A              "; break;
+                                case 0x08: CommandSize = 1; SS << "EX AF, AF'        "; break;
+                                case 0xD9: CommandSize = 1; SS << "EXX               "; break;
+                                case 0xE3: CommandSize = 1; SS << "EX (SP), HL       "; break;
+                                case 0xEB: CommandSize = 1; SS << "EX DE, HL         "; break;
+                                case 0xF3: CommandSize = 1; SS << "DI                "; break;
+                                case 0xFB: CommandSize = 1; SS << "EI                "; break;
+                                case 0x01: CommandSize = 3; SS << "LD BC, " << CommandDataNN << "      "; break;
+                                case 0x11: CommandSize = 3; SS << "LD DE, " << CommandDataNN << "      "; break;
+                                case 0x21: CommandSize = 3; SS << "LD HL, " << CommandDataNN << "      "; break;
+                                case 0x31: CommandSize = 3; SS << "LD SP, " << CommandDataNN << "      "; break;
+                                case 0x22: CommandSize = 3; SS << "LD (" << CommandDataNN << "), HL    "; break;
+                                case 0x02: CommandSize = 1; SS << "LD (BC), A        "; break;
+                                case 0x12: CommandSize = 1; SS << "LD (DE), A        "; break;
+                                case 0x32: CommandSize = 3; SS << "LD (" << CommandDataNN << "), A     "; break;
+                                case 0x3A: CommandSize = 3; SS << "LD A, (" << CommandDataNN << ")     "; break;
+                                case 0x36: CommandSize = 2; SS << "LD (HL), " << CommandDataN << "      "; break;
+                                case 0x0A: CommandSize = 1; SS << "LD A, (BC)        "; break;
+                                case 0x1A: CommandSize = 1; SS << "LD A, (DE)        "; break;
+                                case 0x06: CommandSize = 2; SS << "LD B, " << CommandDataN << "         "; break;
+                                case 0x0E: CommandSize = 2; SS << "LD C, " << CommandDataN << "         "; break;
+                                case 0x16: CommandSize = 2; SS << "LD D, " << CommandDataN << "         "; break;
+                                case 0x1E: CommandSize = 2; SS << "LD E, " << CommandDataN << "         "; break;
+                                case 0x26: CommandSize = 2; SS << "LD H, " << CommandDataN << "         "; break;
+                                case 0x2A: CommandSize = 3; SS << "LD HL, (" << CommandDataNN << ")    "; break;
+                                case 0x2E: CommandSize = 2; SS << "LD L, " << CommandDataN << "         "; break;
+                                case 0x3E: CommandSize = 2; SS << "LD A, " << CommandDataN << "         "; break;
+                                case 0xF9: CommandSize = 1; SS << "LD SP, HL         "; break;
+                                case 0x07: CommandSize = 1; SS << "RLC A             "; break;
+                                case 0x0F: CommandSize = 1; SS << "RRC A             "; break;
+                                case 0x17: CommandSize = 1; SS << "RL A              "; break;
+                                case 0x1F: CommandSize = 1; SS << "RR A              "; break;
+                                case 0x03: CommandSize = 1; SS << "INC BC            "; break;
+                                case 0x13: CommandSize = 1; SS << "INC DE            "; break;
+                                case 0x23: CommandSize = 1; SS << "INC HL            "; break;
+                                case 0x33: CommandSize = 1; SS << "INC SP            "; break;
+                                case 0x0B: CommandSize = 1; SS << "DEC BC            "; break;
+                                case 0x1B: CommandSize = 1; SS << "DEC DE            "; break;
+                                case 0x2B: CommandSize = 1; SS << "DEC HL            "; break;
+                                case 0x3B: CommandSize = 1; SS << "DEC SP            "; break;
+                                case 0x04: CommandSize = 1; SS << "INC B             "; break;
+                                case 0x05: CommandSize = 1; SS << "DEC B             "; break;
+                                case 0x0C: CommandSize = 1; SS << "INC C             "; break;
+                                case 0x0D: CommandSize = 1; SS << "DEC C             "; break;
+                                case 0x14: CommandSize = 1; SS << "INC D             "; break;
+                                case 0x15: CommandSize = 1; SS << "DEC D             "; break;
+                                case 0x1C: CommandSize = 1; SS << "INC E             "; break;
+                                case 0x1D: CommandSize = 1; SS << "DEC E             "; break;
+                                case 0x24: CommandSize = 1; SS << "INC H             "; break;
+                                case 0x25: CommandSize = 1; SS << "DEC H             "; break;
+                                case 0x2C: CommandSize = 1; SS << "INC L             "; break;
+                                case 0x2D: CommandSize = 1; SS << "DEC L             "; break;
+                                case 0x34: CommandSize = 1; SS << "INC (HL)          "; break;
+                                case 0x35: CommandSize = 1; SS << "DEC (HL)          "; break;
+                                case 0x3C: CommandSize = 1; SS << "INC A             "; break;
+                                case 0x3D: CommandSize = 1; SS << "DEC A             "; break;
+                                case 0x09: CommandSize = 1; SS << "ADD HL, BC        "; break;
+                                case 0x19: CommandSize = 1; SS << "ADD HL, DE        "; break;
+                                case 0x29: CommandSize = 1; SS << "ADD HL, HL        "; break;
+                                case 0x39: CommandSize = 1; SS << "ADD HL, SP        "; break;
+                                case 0xC6: CommandSize = 2; SS << "ADD A, " << CommandDataN << "        "; break;
+                                case 0xCE: CommandSize = 2; SS << "ADC A, " << CommandDataN << "        "; break;
+                                case 0xD6: CommandSize = 2; SS << "SUB " << CommandDataN << "           "; break;
+                                case 0xDE: CommandSize = 2; SS << "SBC A, " << CommandDataN << "        "; break;
+                                case 0x2F: CommandSize = 1; SS << "CPL               "; break;
+                                case 0x37: CommandSize = 1; SS << "SCF               "; break;
+                                case 0x3F: CommandSize = 1; SS << "CCF               "; break;
+                                case 0xE6: CommandSize = 2; SS << "AND " << CommandDataN << "           "; break;
+                                case 0xEE: CommandSize = 2; SS << "XOR " << CommandDataN << "           "; break;
+                                case 0xF6: CommandSize = 2; SS << "OR " << CommandDataN << "            "; break;
+                                case 0xFE: CommandSize = 2; SS << "CP " << CommandDataN << "            "; break;
+                                case 0x10: CommandSize = 2; SS << "DJNZ " << CommandLabel << "        "; break;
+                                case 0x18: CommandSize = 2; SS << "JR " << CommandLabel << "          "; break;
+                                case 0x20: CommandSize = 2; SS << "JR NZ, " << CommandLabel << "      "; break;
+                                case 0x28: CommandSize = 2; SS << "JR Z, " << CommandLabel << "       "; break;
+                                case 0x30: CommandSize = 2; SS << "JR NC, " << CommandLabel << "      "; break;
+                                case 0x38: CommandSize = 2; SS << "JR C, " << CommandLabel << "       "; break;
+                                case 0xC3: CommandSize = 3; SS << "JP " << CommandDataNN << "          "; break;
+                                case 0xE9: CommandSize = 1; SS << "JP (HL)           "; break;
+                                case 0xC2: CommandSize = 3; SS << "JP NZ, " << CommandDataNN << "      "; break;
+                                case 0xCA: CommandSize = 3; SS << "JP Z, " << CommandDataNN << "       "; break;
+                                case 0xD2: CommandSize = 3; SS << "JP NC, " << CommandDataNN << "      "; break;
+                                case 0xDA: CommandSize = 3; SS << "JP C, " << CommandDataNN << "       "; break;
+                                case 0xE2: CommandSize = 3; SS << "JP PO, " << CommandDataNN << "      "; break;
+                                case 0xEA: CommandSize = 3; SS << "JP PE, " << CommandDataNN << "      "; break;
+                                case 0xF2: CommandSize = 3; SS << "JP P, " << CommandDataNN << "       "; break;
+                                case 0xFA: CommandSize = 3; SS << "JP M, " << CommandDataNN << "       "; break;
+                                case 0x40: CommandSize = 1; SS << "LD B, B           "; break;
+                                case 0x41: CommandSize = 1; SS << "LD B, C           "; break;
+                                case 0x42: CommandSize = 1; SS << "LD B, D           "; break;
+                                case 0x43: CommandSize = 1; SS << "LD B, E           "; break;
+                                case 0x44: CommandSize = 1; SS << "LD B, H           "; break;
+                                case 0x45: CommandSize = 1; SS << "LD B, L           "; break;
+                                case 0x46: CommandSize = 1; SS << "LD B, (HL)        "; break;
+                                case 0x47: CommandSize = 1; SS << "LD B, A           "; break;
+                                case 0x48: CommandSize = 1; SS << "LD C, B           "; break;
+                                case 0x49: CommandSize = 1; SS << "LD C, C           "; break;
+                                case 0x4A: CommandSize = 1; SS << "LD C, D           "; break;
+                                case 0x4B: CommandSize = 1; SS << "LD C, E           "; break;
+                                case 0x4C: CommandSize = 1; SS << "LD C, H           "; break;
+                                case 0x4D: CommandSize = 1; SS << "LD C, L           "; break;
+                                case 0x4E: CommandSize = 1; SS << "LD C, (HL)        "; break;
+                                case 0x4F: CommandSize = 1; SS << "LD C, A           "; break;
+                                case 0x50: CommandSize = 1; SS << "LD D, B           "; break;
+                                case 0x51: CommandSize = 1; SS << "LD D, C           "; break;
+                                case 0x52: CommandSize = 1; SS << "LD D, D           "; break;
+                                case 0x53: CommandSize = 1; SS << "LD D, E           "; break;
+                                case 0x54: CommandSize = 1; SS << "LD D, H           "; break;
+                                case 0x55: CommandSize = 1; SS << "LD D, L           "; break;
+                                case 0x56: CommandSize = 1; SS << "LD D, (HL)        "; break;
+                                case 0x57: CommandSize = 1; SS << "LD D, A           "; break;
+                                case 0x58: CommandSize = 1; SS << "LD E, B           "; break;
+                                case 0x59: CommandSize = 1; SS << "LD E, C           "; break;
+                                case 0x5A: CommandSize = 1; SS << "LD E, D           "; break;
+                                case 0x5B: CommandSize = 1; SS << "LD E, E           "; break;
+                                case 0x5C: CommandSize = 1; SS << "LD E, H           "; break;
+                                case 0x5D: CommandSize = 1; SS << "LD E, L           "; break;
+                                case 0x5E: CommandSize = 1; SS << "LD E, (HL)        "; break;
+                                case 0x5F: CommandSize = 1; SS << "LD E, A           "; break;
+                                case 0x60: CommandSize = 1; SS << "LD H, B           "; break;
+                                case 0x61: CommandSize = 1; SS << "LD H, C           "; break;
+                                case 0x62: CommandSize = 1; SS << "LD H, D           "; break;
+                                case 0x63: CommandSize = 1; SS << "LD H, E           "; break;
+                                case 0x64: CommandSize = 1; SS << "LD H, H           "; break;
+                                case 0x65: CommandSize = 1; SS << "LD H, L           "; break;
+                                case 0x66: CommandSize = 1; SS << "LD H, (HL)        "; break;
+                                case 0x67: CommandSize = 1; SS << "LD H, A           "; break;
+                                case 0x68: CommandSize = 1; SS << "LD L, B           "; break;
+                                case 0x69: CommandSize = 1; SS << "LD L, C           "; break;
+                                case 0x6A: CommandSize = 1; SS << "LD L, D           "; break;
+                                case 0x6B: CommandSize = 1; SS << "LD L, E           "; break;
+                                case 0x6C: CommandSize = 1; SS << "LD L, H           "; break;
+                                case 0x6D: CommandSize = 1; SS << "LD L, L           "; break;
+                                case 0x6E: CommandSize = 1; SS << "LD L, (HL)        "; break;
+                                case 0x6F: CommandSize = 1; SS << "LD L, A           "; break;
+                                case 0x70: CommandSize = 1; SS << "LD (HL), B        "; break;
+                                case 0x71: CommandSize = 1; SS << "LD (HL), C        "; break;
+                                case 0x72: CommandSize = 1; SS << "LD (HL), D        "; break;
+                                case 0x73: CommandSize = 1; SS << "LD (HL), E        "; break;
+                                case 0x74: CommandSize = 1; SS << "LD (HL), H        "; break;
+                                case 0x75: CommandSize = 1; SS << "LD (HL), L        "; break;
+                                case 0x77: CommandSize = 1; SS << "LD (HL), A        "; break;
+                                case 0x78: CommandSize = 1; SS << "LD A, B           "; break;
+                                case 0x79: CommandSize = 1; SS << "LD A, C           "; break;
+                                case 0x7A: CommandSize = 1; SS << "LD A, D           "; break;
+                                case 0x7B: CommandSize = 1; SS << "LD A, E           "; break;
+                                case 0x7C: CommandSize = 1; SS << "LD A, H           "; break;
+                                case 0x7D: CommandSize = 1; SS << "LD A, L           "; break;
+                                case 0x7E: CommandSize = 1; SS << "LD A, (HL)        "; break;
+                                case 0x7F: CommandSize = 1; SS << "LD A, A           "; break;
+                                case 0x80: CommandSize = 1; SS << "ADD A, B          "; break;
+                                case 0x81: CommandSize = 1; SS << "ADD A, C          "; break;
+                                case 0x82: CommandSize = 1; SS << "ADD A, D          "; break;
+                                case 0x83: CommandSize = 1; SS << "ADD A, E          "; break;
+                                case 0x84: CommandSize = 1; SS << "ADD A, H          "; break;
+                                case 0x85: CommandSize = 1; SS << "ADD A, L          "; break;
+                                case 0x86: CommandSize = 1; SS << "ADD A, (HL)       "; break;
+                                case 0x87: CommandSize = 1; SS << "ADD A, A          "; break;
+                                case 0x88: CommandSize = 1; SS << "ADC A, B          "; break;
+                                case 0x89: CommandSize = 1; SS << "ADC A, C          "; break;
+                                case 0x8A: CommandSize = 1; SS << "ADC A, D          "; break;
+                                case 0x8B: CommandSize = 1; SS << "ADC A, E          "; break;
+                                case 0x8C: CommandSize = 1; SS << "ADC A, H          "; break;
+                                case 0x8D: CommandSize = 1; SS << "ADC A, L          "; break;
+                                case 0x8E: CommandSize = 1; SS << "ADC A, (HL)       "; break;
+                                case 0x8F: CommandSize = 1; SS << "ADC A, A          "; break;
+                                case 0x90: CommandSize = 1; SS << "SUB B             "; break;
+                                case 0x91: CommandSize = 1; SS << "SUB C             "; break;
+                                case 0x92: CommandSize = 1; SS << "SUB D             "; break;
+                                case 0x93: CommandSize = 1; SS << "SUB E             "; break;
+                                case 0x94: CommandSize = 1; SS << "SUB H             "; break;
+                                case 0x95: CommandSize = 1; SS << "SUB L             "; break;
+                                case 0x96: CommandSize = 1; SS << "SUB (HL)          "; break;
+                                case 0x97: CommandSize = 1; SS << "SUB A             "; break;
+                                case 0x98: CommandSize = 1; SS << "SBC A, B          "; break;
+                                case 0x99: CommandSize = 1; SS << "SBC A, C          "; break;
+                                case 0x9A: CommandSize = 1; SS << "SBC A, D          "; break;
+                                case 0x9B: CommandSize = 1; SS << "SBC A, E          "; break;
+                                case 0x9C: CommandSize = 1; SS << "SBC A, H          "; break;
+                                case 0x9D: CommandSize = 1; SS << "SBC A, L          "; break;
+                                case 0x9E: CommandSize = 1; SS << "SBC A, (HL)       "; break;
+                                case 0x9F: CommandSize = 1; SS << "SBC A, A          "; break;
+                                case 0xA0: CommandSize = 1; SS << "AND B             "; break;
+                                case 0xA1: CommandSize = 1; SS << "AND C             "; break;
+                                case 0xA2: CommandSize = 1; SS << "AND D             "; break;
+                                case 0xA3: CommandSize = 1; SS << "AND E             "; break;
+                                case 0xA4: CommandSize = 1; SS << "AND H             "; break;
+                                case 0xA5: CommandSize = 1; SS << "AND L             "; break;
+                                case 0xA6: CommandSize = 1; SS << "AND (HL)          "; break;
+                                case 0xA7: CommandSize = 1; SS << "AND A             "; break;
+                                case 0xA8: CommandSize = 1; SS << "XOR B             "; break;
+                                case 0xA9: CommandSize = 1; SS << "XOR C             "; break;
+                                case 0xAA: CommandSize = 1; SS << "XOR D             "; break;
+                                case 0xAB: CommandSize = 1; SS << "XOR E             "; break;
+                                case 0xAC: CommandSize = 1; SS << "XOR H             "; break;
+                                case 0xAD: CommandSize = 1; SS << "XOR L             "; break;
+                                case 0xAE: CommandSize = 1; SS << "XOR (HL)          "; break;
+                                case 0xAF: CommandSize = 1; SS << "XOR A             "; break;
+                                case 0xB0: CommandSize = 1; SS << "OR B              "; break;
+                                case 0xB1: CommandSize = 1; SS << "OR C              "; break;
+                                case 0xB2: CommandSize = 1; SS << "OR D              "; break;
+                                case 0xB3: CommandSize = 1; SS << "OR E              "; break;
+                                case 0xB4: CommandSize = 1; SS << "OR H              "; break;
+                                case 0xB5: CommandSize = 1; SS << "OR L              "; break;
+                                case 0xB6: CommandSize = 1; SS << "OR (HL)           "; break;
+                                case 0xB7: CommandSize = 1; SS << "OR A              "; break;
+                                case 0xB8: CommandSize = 1; SS << "CP B              "; break;
+                                case 0xB9: CommandSize = 1; SS << "CP C              "; break;
+                                case 0xBA: CommandSize = 1; SS << "CP D              "; break;
+                                case 0xBB: CommandSize = 1; SS << "CP E              "; break;
+                                case 0xBC: CommandSize = 1; SS << "CP H              "; break;
+                                case 0xBD: CommandSize = 1; SS << "CP L              "; break;
+                                case 0xBE: CommandSize = 1; SS << "CP (HL)           "; break;
+                                case 0xBF: CommandSize = 1; SS << "CP A              "; break;
+                                case 0xC1: CommandSize = 1; SS << "POP BC            "; break;
+                                case 0xC5: CommandSize = 1; SS << "PUSH BC           "; break;
+                                case 0xD1: CommandSize = 1; SS << "POP DE            "; break;
+                                case 0xD5: CommandSize = 1; SS << "PUSH DE           "; break;
+                                case 0xE1: CommandSize = 1; SS << "POP HL            "; break;
+                                case 0xE5: CommandSize = 1; SS << "PUSH HL           "; break;
+                                case 0xF1: CommandSize = 1; SS << "POP AF            "; break;
+                                case 0xF5: CommandSize = 1; SS << "PUSH AF           "; break;
+                                case 0xCD: CommandSize = 3; SS << "CALL " << CommandDataNN << "        "; break;
+                                case 0xC4: CommandSize = 3; SS << "CALL NZ " << CommandDataNN << "     "; break;
+                                case 0xCC: CommandSize = 3; SS << "CALL Z, " << CommandDataNN << "     "; break;
+                                case 0xD4: CommandSize = 3; SS << "CALL NC, " << CommandDataNN << "    "; break;
+                                case 0xDC: CommandSize = 3; SS << "CALL C, " << CommandDataNN << "     "; break;
+                                case 0xE4: CommandSize = 3; SS << "CALL PO, " << CommandDataNN << "    "; break;
+                                case 0xEC: CommandSize = 3; SS << "CALL PE, " << CommandDataNN << "    "; break;
+                                case 0xF4: CommandSize = 3; SS << "CALL P, " << CommandDataNN << "     "; break;
+                                case 0xFC: CommandSize = 3; SS << "CALL M, " << CommandDataNN << "     "; break;
+                                case 0xC7: CommandSize = 1; SS << "RST 00            "; break;
+                                case 0xCF: CommandSize = 1; SS << "RST 08            "; break;
+                                case 0xD7: CommandSize = 1; SS << "RST 10            "; break;
+                                case 0xDF: CommandSize = 1; SS << "RST 18            "; break;
+                                case 0xE7: CommandSize = 1; SS << "RST 20            "; break;
+                                case 0xEF: CommandSize = 1; SS << "RST 28            "; break;
+                                case 0xF7: CommandSize = 1; SS << "RST 30            "; break;
+                                case 0xFF: CommandSize = 1; SS << "RST 38            "; break;
+                                case 0xC9: CommandSize = 1; SS << "RET               "; break;
+                                case 0xC0: CommandSize = 1; SS << "RET NZ            "; break;
+                                case 0xC8: CommandSize = 1; SS << "RET Z             "; break;
+                                case 0xD0: CommandSize = 1; SS << "RET NC            "; break;
+                                case 0xD8: CommandSize = 1; SS << "RET C             "; break;
+                                case 0xE0: CommandSize = 1; SS << "RET PO            "; break;
+                                case 0xE8: CommandSize = 1; SS << "RET PE            "; break;
+                                case 0xF0: CommandSize = 1; SS << "RET P             "; break;
+                                case 0xF8: CommandSize = 1; SS << "RET M             "; break;
+                                case 0xD3: CommandSize = 2; SS << "OUT (" << CommandDataN << "), A      "; break;
+                                case 0xDB: CommandSize = 2; SS << "IN A, (" << CommandDataN << ")       "; break;
+
+                                // Rozkazy CB - rozkazy na pojedynczym rejestrze lub bajcie pod adresem HL
+                                case 0xCB:
+
+                                    switch (OpCode1 & b00000111)
+                                    {
+                                        case 0: RegName = "B   "; break;
+                                        case 1: RegName = "C   "; break;
+                                        case 2: RegName = "D   "; break;
+                                        case 3: RegName = "E   "; break;
+                                        case 4: RegName = "H   "; break;
+                                        case 5: RegName = "L   "; break;
+                                        case 6: RegName = "(HL)"; break;
+                                        case 7: RegName = "A   "; break;
+                                    }
+
+                                    switch (OpCode1 & b11111000)
+                                    {
+                                        case 0x00: CommandSize = 2; SS << "RLC " << RegName << "          "; break;
+                                        case 0x08: CommandSize = 2; SS << "RRC " << RegName << "          "; break;
+                                        case 0x10: CommandSize = 2; SS << "RL " << RegName << "           "; break;
+                                        case 0x18: CommandSize = 2; SS << "RR " << RegName << "           "; break;
+                                        case 0x20: CommandSize = 2; SS << "SLA " << RegName << "          "; break;
+                                        case 0x28: CommandSize = 2; SS << "SRA " << RegName << "          "; break;
+                                        case 0x38: CommandSize = 2; SS << "SRL " << RegName << "          "; break;
+                                        case 0x40: CommandSize = 2; SS << "BIT 0, " << RegName << "       "; break;
+                                        case 0x48: CommandSize = 2; SS << "BIT 1, " << RegName << "       "; break;
+                                        case 0x50: CommandSize = 2; SS << "BIT 2, " << RegName << "       "; break;
+                                        case 0x58: CommandSize = 2; SS << "BIT 3, " << RegName << "       "; break;
+                                        case 0x60: CommandSize = 2; SS << "BIT 4, " << RegName << "       "; break;
+                                        case 0x68: CommandSize = 2; SS << "BIT 5, " << RegName << "       "; break;
+                                        case 0x70: CommandSize = 2; SS << "BIT 6, " << RegName << "       "; break;
+                                        case 0x78: CommandSize = 2; SS << "BIT 7, " << RegName << "       "; break;
+                                        case 0x80: CommandSize = 2; SS << "RES 0, " << RegName << "       "; break;
+                                        case 0x88: CommandSize = 2; SS << "RES 1, " << RegName << "       "; break;
+                                        case 0x90: CommandSize = 2; SS << "RES 2, " << RegName << "       "; break;
+                                        case 0x98: CommandSize = 2; SS << "RES 3, " << RegName << "       "; break;
+                                        case 0xA0: CommandSize = 2; SS << "RES 4, " << RegName << "       "; break;
+                                        case 0xA8: CommandSize = 2; SS << "RES 5, " << RegName << "       "; break;
+                                        case 0xB0: CommandSize = 2; SS << "RES 6, " << RegName << "       "; break;
+                                        case 0xB8: CommandSize = 2; SS << "RES 7, " << RegName << "       "; break;
+                                        case 0xC0: CommandSize = 2; SS << "SET 0, " << RegName << "       "; break;
+                                        case 0xC8: CommandSize = 2; SS << "SET 1, " << RegName << "       "; break;
+                                        case 0xD0: CommandSize = 2; SS << "SET 2, " << RegName << "       "; break;
+                                        case 0xD8: CommandSize = 2; SS << "SET 3, " << RegName << "       "; break;
+                                        case 0xE0: CommandSize = 2; SS << "SET 4, " << RegName << "       "; break;
+                                        case 0xE8: CommandSize = 2; SS << "SET 5, " << RegName << "       "; break;
+                                        case 0xF0: CommandSize = 2; SS << "SET 6, " << RegName << "       "; break;
+                                        case 0xF8: CommandSize = 2; SS << "SET 7, " << RegName << "       "; break;
+                                        default:   CommandSize = 2; SS << "UNKNOWN           "; break;
+                                    }
+
+
+                                    break;
+                                case 0xDD: // Rozkazy DD - rozkazy wykorzystujace rejestr IX
+                                case 0xFD: // Rozkazy ED - rozkazy wykorzystujace rejestr IY
+                                    if (OpCode0 == 0xDD)
+                                    {
+                                        RegName = "IX";
+                                    }
+                                    else
+                                    {
+                                        RegName = "IY";
+                                    }
+                                    CommandDataNN = Eden::IntToHex8(OpCode3) + Eden::IntToHex8(OpCode2) + "h";
+                                    CommandDataN = Eden::IntToHex8(OpCode3) + "h";
+                                    CommandDataD = Eden::IntToHex8(OpCode2) + "h";
+
+                                    switch (OpCode1)
+                                    {
+                                        case 0x09: CommandSize = 2; SS << "ADD " << RegName << ", BC        "; break;
+                                        case 0x19: CommandSize = 2; SS << "ADD " << RegName << ", DE        "; break;
+                                        case 0x29: CommandSize = 2; SS << "ADD " << RegName << ", " << RegName << "        "; break;
+                                        case 0x39: CommandSize = 2; SS << "ADD " << RegName << ", SP        "; break;
+                                        case 0x23: CommandSize = 2; SS << "INC " << RegName << "            "; break;
+                                        case 0x2B: CommandSize = 2; SS << "DEC " << RegName << "            "; break;
+                                        case 0x34: CommandSize = 3; SS << "INC (" << RegName << " + " << CommandDataD << ")    "; break;
+                                        case 0x35: CommandSize = 3; SS << "DEC (" << RegName << " + " << CommandDataD << ")    "; break;
+                                        case 0x21: CommandSize = 4; SS << "LD " << RegName << ", " << CommandDataNN << "      "; break;
+                                        case 0x22: CommandSize = 4; SS << "LD (" << CommandDataNN << "), " << RegName << "    "; break;
+                                        case 0x2A: CommandSize = 4; SS << "LD " << RegName << ", (" << CommandDataNN << ")    "; break;
+                                        case 0xF9: CommandSize = 2; SS << "LD SP, " << RegName << "         "; break;
+                                        case 0x36: CommandSize = 4; SS << "LD (" << RegName << " + " << CommandDataD << "), " << CommandDataN << ""; break;
+                                        case 0x46: CommandSize = 3; SS << "LD B, (" << RegName << " + " << CommandDataD << ")  "; break;
+                                        case 0x4E: CommandSize = 3; SS << "LD C, (" << RegName << " + " << CommandDataD << ")  "; break;
+                                        case 0x56: CommandSize = 3; SS << "LD D, (" << RegName << " + " << CommandDataD << ")  "; break;
+                                        case 0x5E: CommandSize = 3; SS << "LD E, (" << RegName << " + " << CommandDataD << ")  "; break;
+                                        case 0x66: CommandSize = 3; SS << "LD H, (" << RegName << " + " << CommandDataD << ")  "; break;
+                                        case 0x6E: CommandSize = 3; SS << "LD L, (" << RegName << " + " << CommandDataD << ")  "; break;
+                                        case 0x7E: CommandSize = 3; SS << "LD A, (" << RegName << " + " << CommandDataD << ")  "; break;
+                                        case 0x70: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), B  "; break;
+                                        case 0x71: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), C  "; break;
+                                        case 0x72: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), D  "; break;
+                                        case 0x73: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), E  "; break;
+                                        case 0x74: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), H  "; break;
+                                        case 0x75: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), L  "; break;
+                                        case 0x77: CommandSize = 3; SS << "LD (" << RegName << " + " << CommandDataD << "), A  "; break;
+                                        case 0x86: CommandSize = 3; SS << "ADD A, (" << RegName << " + " << CommandDataD << ") "; break;
+                                        case 0x8E: CommandSize = 3; SS << "ADC A, (" << RegName << " + " << CommandDataD << ") "; break;
+                                        case 0x96: CommandSize = 3; SS << "SUB, (" << RegName << " + " << CommandDataD << ")   "; break;
+                                        case 0x9E: CommandSize = 3; SS << "SBC A, (" << RegName << " + " << CommandDataD << ") "; break;
+                                        case 0xA6: CommandSize = 3; SS << "AND, (" << RegName << " + " << CommandDataD << ")   "; break;
+                                        case 0xAE: CommandSize = 3; SS << "XOR, (" << RegName << " + " << CommandDataD << ")   "; break;
+                                        case 0xB6: CommandSize = 3; SS << "OR, (" << RegName << " + " << CommandDataD << ")    "; break;
+                                        case 0xBE: CommandSize = 3; SS << "CP, (" << RegName << " + " << CommandDataD << ")    "; break;
+                                        case 0xE3: CommandSize = 2; SS << "EX (SP), " << RegName << "       "; break;
+                                        case 0xE1: CommandSize = 2; SS << "POP " << RegName << "            "; break;
+                                        case 0xE5: CommandSize = 2; SS << "PUSH " << RegName << "           "; break;
+                                        case 0xE9: CommandSize = 2; SS << "JP (" << RegName << ")           "; break;
+
+                                        case 0xCB: // Rozkazy CB
+                                            CommandDataD = Eden::IntToHex8(OpCode2) + "h";
+                                            switch (OpCode3)
+                                            {
+                                                case 0x06: CommandSize = 4; SS << "RLC (" << RegName << " + " << CommandDataD << ")    "; break;
+                                                case 0x0E: CommandSize = 4; SS << "RRC (" << RegName << " + " << CommandDataD << ")    "; break;
+                                                case 0x16: CommandSize = 4; SS << "RL (" << RegName << " + " << CommandDataD << ")     "; break;
+                                                case 0x1E: CommandSize = 4; SS << "RR (" << RegName << " + " << CommandDataD << ")     "; break;
+                                                case 0x26: CommandSize = 4; SS << "SLA (" << RegName << " + " << CommandDataD << ")    "; break;
+                                                case 0x2E: CommandSize = 4; SS << "SRA (" << RegName << " + " << CommandDataD << ")    "; break;
+                                                case 0x3E: CommandSize = 4; SS << "SRL (" << RegName << " + " << CommandDataD << ")    "; break;
+                                                case 0x46: CommandSize = 4; SS << "BIT 0, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x4E: CommandSize = 4; SS << "BIT 1, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x56: CommandSize = 4; SS << "BIT 2, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x5E: CommandSize = 4; SS << "BIT 3, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x66: CommandSize = 4; SS << "BIT 4, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x6E: CommandSize = 4; SS << "BIT 5, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x76: CommandSize = 4; SS << "BIT 6, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x7E: CommandSize = 4; SS << "BIT 7, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x86: CommandSize = 4; SS << "RES 0, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x8E: CommandSize = 4; SS << "RES 1, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x96: CommandSize = 4; SS << "RES 2, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0x9E: CommandSize = 4; SS << "RES 3, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xA6: CommandSize = 4; SS << "RES 4, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xAE: CommandSize = 4; SS << "RES 5, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xB6: CommandSize = 4; SS << "RES 6, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xBE: CommandSize = 4; SS << "RES 7, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xC6: CommandSize = 4; SS << "SET 0, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xCE: CommandSize = 4; SS << "SET 1, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xD6: CommandSize = 4; SS << "SET 2, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xDE: CommandSize = 4; SS << "SET 3, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xE6: CommandSize = 4; SS << "SET 4, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xEE: CommandSize = 4; SS << "SET 5, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xF6: CommandSize = 4; SS << "SET 6, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                case 0xFE: CommandSize = 4; SS << "SET 7, (" << RegName << " + " << CommandDataD << ") "; break;
+                                                default:   CommandSize = 4; SS << "UNKNOWN           "; break;
+                                            }
+                                            break;
+
+                                        default:   CommandSize = 2; SS << "UNKNOWN           "; break;
+                                    }
+
+                                    break;
+                                case 0xED: // Rozkazy ED
+                                    CommandDataNN = Eden::IntToHex8(OpCode3) + Eden::IntToHex8(OpCode2) + "h";
+                                    switch (OpCode1)
+                                    {
+                                        case 0x40: CommandSize = 2; SS << "IN B, (C)         "; break;
+                                        case 0x48: CommandSize = 2; SS << "IN C, (C)         "; break;
+                                        case 0x50: CommandSize = 2; SS << "IN D, (C)         "; break;
+                                        case 0x58: CommandSize = 2; SS << "IN E, (C)         "; break;
+                                        case 0x60: CommandSize = 2; SS << "IN H, (C)         "; break;
+                                        case 0x68: CommandSize = 2; SS << "IN L, (C)         "; break;
+                                        case 0x78: CommandSize = 2; SS << "IN A, (C)         "; break;
+                                        case 0x41: CommandSize = 2; SS << "OUT (C), B        "; break;
+                                        case 0x49: CommandSize = 2; SS << "OUT (C), C        "; break;
+                                        case 0x51: CommandSize = 2; SS << "OUT (C), D        "; break;
+                                        case 0x59: CommandSize = 2; SS << "OUT (C), E        "; break;
+                                        case 0x61: CommandSize = 2; SS << "OUT (C), H        "; break;
+                                        case 0x69: CommandSize = 2; SS << "OUT (C), L        "; break;
+                                        case 0x79: CommandSize = 2; SS << "OUT (C), A        "; break;
+                                        case 0x46: CommandSize = 2; SS << "IM 0              "; break;
+                                        case 0x56: CommandSize = 2; SS << "IM 1              "; break;
+                                        case 0x5E: CommandSize = 2; SS << "IM 2              "; break;
+                                        case 0x45: CommandSize = 2; SS << "RETN              "; break;
+                                        case 0x4D: CommandSize = 2; SS << "RETI              "; break;
+                                        case 0x47: CommandSize = 2; SS << "LD I, A           "; break;
+                                        case 0x4F: CommandSize = 2; SS << "LD R, A           "; break;
+                                        case 0x57: CommandSize = 2; SS << "LD A, I           "; break;
+                                        case 0x5F: CommandSize = 2; SS << "LD A, R           "; break;
+                                        case 0x43: CommandSize = 4; SS << "LD (" << CommandDataNN << "), BC    "; break;
+                                        case 0x53: CommandSize = 4; SS << "LD (" << CommandDataNN << "), DE    "; break;
+                                        case 0x63: CommandSize = 4; SS << "LD (" << CommandDataNN << "), HL    "; break;
+                                        case 0x73: CommandSize = 4; SS << "LD (" << CommandDataNN << "), SP    "; break;
+                                        case 0x4B: CommandSize = 4; SS << "LD BC, (" << CommandDataNN << ")    "; break;
+                                        case 0x5B: CommandSize = 4; SS << "LD DE, (" << CommandDataNN << ")    "; break;
+                                        case 0x6B: CommandSize = 4; SS << "LD HL, (" << CommandDataNN << ")    "; break;
+                                        case 0x7B: CommandSize = 4; SS << "LD SP, (" << CommandDataNN << ")    "; break;
+                                        case 0x44: CommandSize = 2; SS << "NEG               "; break;
+                                        case 0x67: CommandSize = 2; SS << "RRD               "; break;
+                                        case 0x6F: CommandSize = 2; SS << "RLD               "; break;
+                                        case 0x4A: CommandSize = 2; SS << "ADC HL, BC        "; break;
+                                        case 0x5A: CommandSize = 2; SS << "ADC HL, DE        "; break;
+                                        case 0x6A: CommandSize = 2; SS << "ADC HL, HL        "; break;
+                                        case 0x7A: CommandSize = 2; SS << "ADC HL, SP        "; break;
+                                        case 0x42: CommandSize = 2; SS << "SBC HL, BC        "; break;
+                                        case 0x52: CommandSize = 2; SS << "SBC HL, DE        "; break;
+                                        case 0x62: CommandSize = 2; SS << "SBC HL, HL        "; break;
+                                        case 0x72: CommandSize = 2; SS << "SBC HL, SP        "; break;
+                                        case 0xA0: CommandSize = 2; SS << "LDI               "; break;
+                                        case 0xA8: CommandSize = 2; SS << "LDD               "; break;
+                                        case 0xB0: CommandSize = 2; SS << "LDIR              "; break;
+                                        case 0xB8: CommandSize = 2; SS << "LDDR              "; break;
+                                        case 0xA1: CommandSize = 2; SS << "CPI               "; break;
+                                        case 0xA9: CommandSize = 2; SS << "CPD               "; break;
+                                        case 0xB1: CommandSize = 2; SS << "CPIR              "; break;
+                                        case 0xB9: CommandSize = 2; SS << "CPDR              "; break;
+                                        case 0xA2: CommandSize = 2; SS << "INI               "; break;
+                                        case 0xAA: CommandSize = 2; SS << "IND               "; break;
+                                        case 0xB2: CommandSize = 2; SS << "INIR              "; break;
+                                        case 0xBA: CommandSize = 2; SS << "INDR              "; break;
+                                        case 0xA3: CommandSize = 2; SS << "OUTI              "; break;
+                                        case 0xAB: CommandSize = 2; SS << "OUTD              "; break;
+                                        case 0xB3: CommandSize = 2; SS << "OTIR              "; break;
+                                        case 0xBB: CommandSize = 2; SS << "OTDR              "; break;
+                                        default:   CommandSize = 2; SS << "UNKNOWN           "; break;
+                                    }
+                                    break;
+
+
+                                default:   CommandSize = 1; SS << "UNKNOWN           "; break;
+                            }
+                            SS << "  ";
+                        }
+
+
+                        if (DebugReg0X)
+                        {
+                            if (CommandSize >= 1)
+                            {
+                                SS << "  " + Eden::IntToHex8(OpCode0);
+                            }
+                            else
+                            {
+                                SS << "    ";
+                            }
+                            if ((CommandSize >= 2) && (Reg_PC < 65535)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 1)); } else { SS << "   "; }
+                            if ((CommandSize >= 3) && (Reg_PC < 65534)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 2)); } else { SS << "   "; }
+                            if ((CommandSize >= 4) && (Reg_PC < 65533)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 3)); } else { SS << "   "; }
+                            if ((CommandSize >= 5) && (Reg_PC < 65532)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 4)); } else { SS << "   "; }
+                            if ((CommandSize >= 6) && (Reg_PC < 65531)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 5)); } else { SS << "   "; }
+                            if ((CommandSize >= 7) && (Reg_PC < 65530)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 6)); } else { SS << "   "; }
+                            if ((CommandSize >= 8) && (Reg_PC < 65529)) { SS << " " << Eden::IntToHex8(MemGet(Reg_PC + 7)); } else { SS << "   "; }
+                        }
+
+                        ProgTrace_[Reg_PC_Addr] = SS.str();
+
+                        if (DebugReg1X)
+                        {
+                            SS << "  A=" << Eden::IntToHex8(Reg_A);
+                            SS << "  F=" << Eden::IntToHex8(Reg_F);
+                            SS << "  B=" << Eden::IntToHex8(Reg_B);
+                            SS << "  C=" << Eden::IntToHex8(Reg_C);
+                            SS << "  D=" << Eden::IntToHex8(Reg_D);
+                            SS << "  E=" << Eden::IntToHex8(Reg_E);
+                            SS << "  H=" << Eden::IntToHex8(Reg_H);
+                            SS << "  L=" << Eden::IntToHex8(Reg_L);
+
+                        }
+
+                        if (DebugReg2X)
+                        {
+                            SS << "  A'=" << Eden::IntToHex8(Reg_A_);
+                            SS << "  F'=" << Eden::IntToHex8(Reg_F_);
+                            SS << "  B'=" << Eden::IntToHex8(Reg_B_);
+                            SS << "  C'=" << Eden::IntToHex8(Reg_C_);
+                            SS << "  D'=" << Eden::IntToHex8(Reg_D_);
+                            SS << "  E'=" << Eden::IntToHex8(Reg_E_);
+                            SS << "  H'=" << Eden::IntToHex8(Reg_H_);
+                            SS << "  L'=" << Eden::IntToHex8(Reg_L_);
+                        }
+
+                        if (DebugReg3X)
+                        {
+                            SS << "  IX=" << Eden::IntToHex16(Reg_IX);
+                            SS << "  IY=" << Eden::IntToHex16(Reg_IY);
+                            SS << "  SP=" << Eden::IntToHex16(Reg_SP);
+                        }
+
+                        if (DebugReg4X)
+                        {
+                            SS << "  I=" << Eden::IntToHex8(Reg_I);
+                            SS << "  R=" << Eden::IntToHex8(Reg_R);
+
+                            //SS << "  IFF1=" << (Reg_IFF1 ? "1" : "0");
+                            //SS << "  IFF2=" << (Reg_IFF2 ? "1" : "0");
+                        }
+
+
+                        ProgTrace.push_back(SS.str());
+                        ProgTraceL++;
                     }
-
-                    ProgTrace_[Reg_PC_Addr] = SS.str();
-
-                    if (DebugReg1X)
-                    {
-                        SS << "  A=" << Eden::IntToHex8(Reg_A);
-                        SS << "  F=" << Eden::IntToHex8(Reg_F);
-                        SS << "  B=" << Eden::IntToHex8(Reg_B);
-                        SS << "  C=" << Eden::IntToHex8(Reg_C);
-                        SS << "  D=" << Eden::IntToHex8(Reg_D);
-                        SS << "  E=" << Eden::IntToHex8(Reg_E);
-                        SS << "  H=" << Eden::IntToHex8(Reg_H);
-                        SS << "  L=" << Eden::IntToHex8(Reg_L);
-
-                    }
-
-                    if (DebugReg2X)
-                    {
-                        SS << "  A'=" << Eden::IntToHex8(Reg_A_);
-                        SS << "  F'=" << Eden::IntToHex8(Reg_F_);
-                        SS << "  B'=" << Eden::IntToHex8(Reg_B_);
-                        SS << "  C'=" << Eden::IntToHex8(Reg_C_);
-                        SS << "  D'=" << Eden::IntToHex8(Reg_D_);
-                        SS << "  E'=" << Eden::IntToHex8(Reg_E_);
-                        SS << "  H'=" << Eden::IntToHex8(Reg_H_);
-                        SS << "  L'=" << Eden::IntToHex8(Reg_L_);
-                    }
-
-                    if (DebugReg3X)
-                    {
-                        SS << "  IX=" << Eden::IntToHex16(Reg_IX);
-                        SS << "  IY=" << Eden::IntToHex16(Reg_IY);
-                        SS << "  SP=" << Eden::IntToHex16(Reg_SP);
-                    }
-
-                    if (DebugReg4X)
-                    {
-                        SS << "  I=" << Eden::IntToHex8(Reg_I);
-                        SS << "  R=" << Eden::IntToHex8(Reg_R);
-
-                        //SS << "  IFF1=" << (Reg_IFF1 ? "1" : "0");
-                        //SS << "  IFF2=" << (Reg_IFF2 ? "1" : "0");
-                    }
-
-
-                    ProgTrace.push_back(SS.str());
-                    ProgTraceL++;
                 }
 //if (Reg_PC == 0xC6E0)
 //{
-//    cout << ">>" << Eden::IntToHex16(Reg_SP) << endl;
+                //    cout << ">>" << Eden::IntToHex16(Reg_SP) << endl;
+                /*if (DebugTestStep < 3000)
+                {
+                    cout << DebugTestStep << "  >>  " << Eden::IntToHex16(Reg_PC) << " [" << Eden::IntToHex8(MemGet(Reg_PC)) << Eden::IntToHex8(MemGet(Reg_PC + 1)) << Eden::IntToHex8(MemGet(Reg_PC + 2)) << Eden::IntToHex8(MemGet(Reg_PC + 3)) << "] " << Eden::IntToHex16(Reg_SP);
+                    cout << "  AF=" << Eden::IntToHex8(Reg_A) << Eden::IntToHex8(Reg_F);
+                    cout << "  BC=" << Eden::IntToHex8(Reg_B) << Eden::IntToHex8(Reg_C);
+                    cout << "  DE=" << Eden::IntToHex8(Reg_D) << Eden::IntToHex8(Reg_E);
+                    cout << "  HL=" << Eden::IntToHex8(Reg_H) << Eden::IntToHex8(Reg_L);
+                }*/
 //}
 
                 Reg_PC++;
@@ -3581,6 +3597,16 @@ void CpuMem::ProgramWork(bool OneStep)
                 }
             }
 
+            /*if (DebugTestStep < 3000)
+            {
+                cout << " --> " << Eden::IntToHex16(Reg_PC) << "  " << Eden::IntToHex16(Reg_SP);
+                cout << "  AF=" << Eden::IntToHex8(Reg_A) << Eden::IntToHex8(Reg_F);
+                cout << "  BC=" << Eden::IntToHex8(Reg_B) << Eden::IntToHex8(Reg_C);
+                cout << "  DE=" << Eden::IntToHex8(Reg_D) << Eden::IntToHex8(Reg_E);
+                cout << "  HL=" << Eden::IntToHex8(Reg_H) << Eden::IntToHex8(Reg_L) << endl;
+                DebugTestStep++;
+            }*/
+
             // Rejestr R jest zwiekszany co kazdy rozkaz
             Reg_R = (Reg_R + 1) & b01111111;
 
@@ -3688,6 +3714,7 @@ void CpuMem::InterruptPeriodCalc()
 ///
 void CpuMem::Reset(char Zero)
 {
+    DebugTestStep = 0;
     AddrOffset = 1;
     InterruptPeriodCalc();
 
@@ -3696,8 +3723,14 @@ void CpuMem::Reset(char Zero)
     {
         for (int I = 0; I < 65536; I++)
         {
-            //MemSet(I, 0);
-            MemSet(I, rand());
+            if (InitRandom)
+            {
+                MemSet(I, rand());
+            }
+            else
+            {
+                MemSet(I, 0);
+            }
         }
 
         AudioAY_->Reset();
@@ -3896,10 +3929,14 @@ void CpuMem::DoPUSH(uchar &ValH, uchar &ValL)
     MemSet(Reg_SP, ValH);
     Reg_SP--;
     MemSet(Reg_SP, ValL);
+    //std::cout << Eden::IntToHex16(Reg_SP) << " v " << Eden::IntToHex8(MemGet(Reg_SP)) << " " << Eden::IntToHex8(MemGet(Reg_SP + 1));
+    //std::cout << " " << Eden::IntToHex8(MemGet(Reg_SP + 2)) << " " << Eden::IntToHex8(MemGet(Reg_SP + 3)) << std::endl;
 }
 
 void CpuMem::DoPOP(uchar &ValH, uchar &ValL)
 {
+    //std::cout << Eden::IntToHex16(Reg_SP) << " ^ " << Eden::IntToHex8(MemGet(Reg_SP)) << " " << Eden::IntToHex8(MemGet(Reg_SP + 1));
+    //std::cout << " " << Eden::IntToHex8(MemGet(Reg_SP + 2)) << " " << Eden::IntToHex8(MemGet(Reg_SP + 3)) << std::endl;
     ValL = MemGet(Reg_SP);
     Reg_SP++;
     ValH = MemGet(Reg_SP);
@@ -4429,6 +4466,12 @@ void CpuMem::DoIN(uchar AddrH, uchar AddrL, uchar &Reg, bool Flags)
     //bool NoStd = true;
     Reg = 0x00;
 
+    // Dysk ATA
+    if (AtaDisk_->IsAtaAddr(AddrL))
+    {
+        Reg = AtaDisk_->DoIN(AddrL);
+    }
+
     // Status drukarki Mera-Blonie D-100
     if (Printer == 1)
     {
@@ -4460,7 +4503,10 @@ void CpuMem::DoIN(uchar AddrH, uchar AddrL, uchar &Reg, bool Flags)
         // Magnetofon
         Reg = Reg & Tape_->GetState();
 
-        //cout << Eden::IntToHex8(AddrH) << Eden::IntToHex8(AddrL) << " = " << Eden::IntToHex8(Reg) << endl;
+        if (Reg != 0x7F)
+        {
+            //cout << Eden::IntToHex16(Reg_PC) << "  " << Eden::IntToHex8(AddrH) << Eden::IntToHex8(AddrL) << " = " << Eden::IntToHex8(Reg) << endl;
+        }
     }
 
     //if (NoStd)
@@ -4483,6 +4529,12 @@ void CpuMem::DoOUT(uchar AddrH, uchar AddrL, uchar &Reg)
     AddrH++;
 
     //bool NoStd = true;
+
+    // Dysk ATA
+    if (AtaDisk_->IsAtaAddr(AddrL))
+    {
+        AtaDisk_->DoOUT(AddrL, Reg);
+    }
 
 
     // Wysylanie znaku do drukarki Mera-Blonie D-100

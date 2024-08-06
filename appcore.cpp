@@ -44,11 +44,13 @@ AppCore::AppCore()
     Screen_ = new Screen();
     Keyboard_ = new Keyboard();
     AudioAY_ = new AudioAY();
+    AtaDisk_ = new AtaDisk();
     CpuMem_ = new CpuMem();
     Screen_->CpuMem_ = CpuMem_;
     CpuMem_->Keyboard_ = Keyboard_;
     CpuMem_->Tape_ = Tape_;
     CpuMem_->AudioAY_ = AudioAY_;
+    CpuMem_->AtaDisk_ = AtaDisk_;
 
     EdenClass::ConfigFile CF;
     CF.FileLoad(Eden::ApplicationDirectory() + "cobra1.cfg");
@@ -72,6 +74,8 @@ AppCore::AppCore()
     CF.ParamGet("CpuMem_DebugReg2", CpuMem_->DebugReg2);
     CF.ParamGet("CpuMem_DebugReg3", CpuMem_->DebugReg3);
     CF.ParamGet("CpuMem_DebugReg4", CpuMem_->DebugReg4);
+    CF.ParamGet("CpuMem_DebugTraceRange1", CpuMem_->DebugTraceRange1);
+    CF.ParamGet("CpuMem_DebugTraceRange2", CpuMem_->DebugTraceRange2);
     CF.ParamGet("Tape_SetThreshold", Tape_->SetThreshold);
     CF.ParamGet("Tape_SetThreshold0", Tape_->SetThreshold0);
     CF.ParamGet("Tape_SetSample", Tape_->SetSample);
@@ -84,6 +88,10 @@ AppCore::AppCore()
     CF.ParamGet("FileRam", FileRam);
     CF.ParamGet("AudioAY_ChipClock", AudioAY_->ChipClock);
     CF.ParamGet("CpuMem_InterruptPeriod", CpuMem_->InterruptPeriod);
+    CF.ParamGet("AtaDisk0File", AtaDisk_->Disk0Name);
+    CF.ParamGet("AtaDisk1File", AtaDisk_->Disk1Name);
+    CF.ParamGet("AtaDisk0Sector", AtaDisk_->Disk0Sector);
+    CF.ParamGet("AtaDisk1Sector", AtaDisk_->Disk1Sector);
 
     CpuMem_->LoadRom(AppDir, FileRom, FileLst, FileRam);
     Screen_->LoadRom(AppDir, FileChr);
@@ -125,6 +133,8 @@ void AppCore::SettingsSave()
     CF.ParamSet("CpuMem_DebugReg2", CpuMem_->DebugReg2);
     CF.ParamSet("CpuMem_DebugReg3", CpuMem_->DebugReg3);
     CF.ParamSet("CpuMem_DebugReg4", CpuMem_->DebugReg4);
+    CF.ParamGet("CpuMem_DebugTraceRange1", CpuMem_->DebugTraceRange1);
+    CF.ParamGet("CpuMem_DebugTraceRange2", CpuMem_->DebugTraceRange2);
     CF.ParamSet("Tape_SetThreshold", Tape_->SetThreshold);
     CF.ParamSet("Tape_SetThreshold0", Tape_->SetThreshold0);
     CF.ParamSet("Tape_SetSample", Tape_->SetSample);
@@ -137,6 +147,11 @@ void AppCore::SettingsSave()
     CF.ParamSet("FileRam", FileRam);
     CF.ParamSet("AudioAY_ChipClock", AudioAY_->ChipClock);
     CF.ParamSet("CpuMem_InterruptPeriod", CpuMem_->InterruptPeriod);
+    CF.ParamSet("AtaDisk0File", AtaDisk_->Disk0Name);
+    CF.ParamSet("AtaDisk1File", AtaDisk_->Disk1Name);
+    CF.ParamSet("AtaDisk0Sector", AtaDisk_->Disk0Sector);
+    CF.ParamSet("AtaDisk1Sector", AtaDisk_->Disk1Sector);
+
     CF.FileSave(Eden::ApplicationDirectory() + "cobra1.cfg");
 }
 

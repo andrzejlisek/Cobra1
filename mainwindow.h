@@ -39,6 +39,10 @@ public:
     void SoundStart();
     void SoundStop();
 
+    vector<string> Params;
+    void showEvent(QShowEvent* event);
+
+
 private:
     Ui::MainWindow *ui;
     void resizeEvent(QResizeEvent* event);

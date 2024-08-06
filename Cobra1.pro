@@ -13,6 +13,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
+    atadisk.cpp \
     audioay.cpp \
     configfile.cpp \
         mainwindow.cpp \
@@ -29,6 +30,7 @@ SOURCES += main.cpp\
     helpsettings.cpp
 
 HEADERS  += mainwindow.h \
+    atadisk.h \
     audioay.h \
     binary.h \
     configfile.h \

@@ -42,6 +42,7 @@ public:
     CpuMem * CpuMem_;
     Tape * Tape_;
     AudioAY * AudioAY_;
+    AtaDisk * AtaDisk_;
     AppCore();
     ~AppCore();
     void SettingsSave();

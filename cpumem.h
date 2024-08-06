@@ -11,6 +11,7 @@
 #include "tape.h"
 #include <queue>
 #include "audioay.h"
+#include "atadisk.h"
 
 
 
@@ -56,6 +57,7 @@ public:
     uchar * RomMem;
     int RomNo;
     AudioAY * AudioAY_;
+    AtaDisk * AtaDisk_;
 
     void SetBank(int N);
 
@@ -65,6 +67,9 @@ public:
     bool DebugReg2 = false;
     bool DebugReg3 = false;
     bool DebugReg4 = false;
+
+    int DebugTraceRange1 = 0;
+    int DebugTraceRange2 = 65535;
 
     bool SoundSignal;
     char SoundLevel1;
@@ -91,7 +96,7 @@ public:
     void SoundReset();
     void Reset(char Zero);
     string ExitMessage;
-    int Printer;
+    int Printer = 0;
 
     list<uchar> PrintBuffer;
     int InterruptPeriod = 0;
@@ -100,6 +105,8 @@ public:
     bool ProgramWorking;
     bool ProgramWorking_ = false;
 private:
+    int DebugTestStep = 0;
+    bool InitRandom = false;
     int FileNumber = 1;
     int InterruptCpuPeriod = 0;
     int InterruptCpuCounter = 0;
