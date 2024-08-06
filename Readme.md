@@ -134,6 +134,7 @@ Do tego celu służą następujące pola w sekcji **Pamięć**:
 * **Lista banków ROM** \- Plik definiujący listę banków dostępnych pod poszczególnymi numerami\. Jest to plik tekstowy zawierający dokładnie 256 linii, w każdej linii są dwie liczby zapisane w systemie szesnastkowym\. Pierwsza określa numer pierwszego bajtu danego banku, a druga określa wielkość banku\. Zaleca się, żeby wszystkie banki były tej samej wielkości\.
 * **Obraz generatora znaków** \- Plik binarny zawierający wzory znaków\. Standardowo plik jest wielkości 2048 bajtów \(256 znaków po 8 bajtów na znak\), jednakże ten plik może zawierać więcej zestawów\. Liczba zestawów może wynosić 1, 2, 4, 8, 16, 32, 64, 128 lub 256 pozycji, wobec czego plik może mieć wielkość równą 2048 bajtów pomnożoną przez liczbę zestawów\. Zestawy w komputerze są numerowane od 0 do 255, przy czym w przypadku mniejszej faktycznej liczbie zestawów, zestawy powtarzają się cyklicznie\. W najprostszym przypadku, gdy zostanie wczytany plik o wielkości 2048 bajtów, to wszystkie zestawy będą takie same\.
 * **Wstępna zawartość RAM** \- Plik zawierający początkową zawartość pamięci RAM po zerowaniu komputera\. Można to wykorzystać na szybkie wczytanie interpretera BASIC lub innego programu wczytywanego za pomocą magnetofonu\.
+* **Dysk ATA master**, **Dysk ATA slave** \- Plik obrazu dysku twardego dla interfejsu ATA, liczba obok nazwy pliku \(zwykle 512\) wskazuje liczbę bajtów na sektor, można określić dla każdego dysku niezależnie\. Interfejs ATA jest symulowany tylko wtedy, gdy jest podany co najmniej jeden plik obrazu dysku twardego\.
 
 Przycisk **Wybierz plik** pozwala wybrać dowolny plik\. Jeżeli nie ma pełnej ścieżki dostępu, zostanie wczytany plik znajdujący się w folderze z emulatorem\. Aby zmiana plików odniosła skutek, po wybraniu plików należy wyzerować emulator za pomocą klawisza **F8**\.
 
@@ -171,7 +172,12 @@ Rejestrowanie pracy konfiguruje się w oknie ustawień \(klawisz **F1**\), w sek
 
 * **Rejestrowanie rozkazów** \- Włącza lub wyłacza rejestrowanie wykonywanych rozkazów do plików\. Podczas rejestrowania pracy, emulacja może być spowolniona\.
 * **Pamięć** \- Zapisywanie wartości bajtów z pamięci, które tworzą rejestrowane rozkazy\. Ta opcja dotyczy obu plików\.
-* **Rejestry \.\.\.** \- Cztery opcje dotyczące poszczególnych grup rejestrów, dotyczą wyłącznie pliku **progtraceX\.txt**\.
+* Cztery opcje dotyczące poszczególnych grup rejestrów, dotyczą wyłącznie pliku **progtraceX\.txt**\.
+  * **R\. główne** \- Rejestry główne AFBCDEHL\.
+  * **R\. dodatkowe** \- Rejestry dodatkowe AFBCDEHL\.
+  * **IX,IY,SP** \- Rejestry indeksowe i stosu
+  * **I,R** \- Rejestry przerwania i odświeżania pamięci\.
+* **Zakres adresów \(hex\)** \- Zakres adresów licznika rozkazów, w krórym rejestrowanie będzie wykonywane\. W przypadku rozkazów wykonywanych poza tym zakresem, nie będą one rejestrowane\.
 
 
 

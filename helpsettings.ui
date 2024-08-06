@@ -208,7 +208,7 @@ F11 - Jeden krok</string>
       <item row="4" column="0">
        <widget class="QCheckBox" name="DebugReg1">
         <property name="text">
-         <string>R. Główne</string>
+         <string>R. główne</string>
         </property>
        </widget>
       </item>
@@ -238,6 +238,12 @@ F11 - Jeden krok</string>
       </item>
       <item row="7" column="0" colspan="2">
        <widget class="QLabel" name="DebugTraceRangeL">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Zakres adresów (hex):</string>
         </property>
@@ -269,12 +275,23 @@ F11 - Jeden krok</string>
   <tabstop>ScreenNegative</tabstop>
   <tabstop>ScreenColors</tabstop>
   <tabstop>ScreenSwap</tabstop>
+  <tabstop>ScreenMemCommon</tabstop>
+  <tabstop>AudioAYFreqT</tabstop>
+  <tabstop>InterruptPeriodT</tabstop>
   <tabstop>VolumeBeepS</tabstop>
   <tabstop>VolumeSoundS</tabstop>
+  <tabstop>VolumeAYS</tabstop>
   <tabstop>AudioTimerT</tabstop>
   <tabstop>AudioBufferT</tabstop>
   <tabstop>AudioElementT</tabstop>
+  <tabstop>DebugTrace</tabstop>
+  <tabstop>DebugReg0</tabstop>
+  <tabstop>DebugReg1</tabstop>
+  <tabstop>DebugReg2</tabstop>
   <tabstop>DebugReg3</tabstop>
+  <tabstop>DebugReg4</tabstop>
+  <tabstop>DebugTraceRange1T</tabstop>
+  <tabstop>DebugTraceRange2T</tabstop>
  </tabstops>
  <resources/>
  <connections/>
