@@ -12,11 +12,35 @@ AtaDisk::AtaDisk()
     ReadWriteSectorCount = 1;
     ReadWriteCounter = 0;
     ReadWriteError = false;
-    DebugMsg = true;
+    DebugMsg = false;
+    DebugLogInOut = false;
+    DebugLogCmd = false;
+}
+
+void AtaDisk::DebugLogData(string str)
+{
+    fstream DebugF;
+    string FileName1 = Eden::ApplicationDirectory() + "progdisk.txt";
+
+    DebugF.open(FileName1, ios::out | ios::app);
+    if (DebugF.is_open())
+    {
+        DebugF << str;
+        DebugF.close();
+    }
 }
 
 bool AtaDisk::DiskRead(int Offset, int Length)
 {
+    string LogInfo = "";
+    if (DebugLogInOut)
+    {
+        LogInfo = DiskSlave ? "SLAVE   " : "MASTER  ";
+        LogInfo = LogInfo + "READ    ";
+        LogInfo = LogInfo + "OFFSET=" + Eden::IntToHex32(Offset) + "    ";
+        LogInfo = LogInfo + "LENGTH=" + Eden::IntToHex32(Length) + "    ";
+    }
+
     if (DebugMsg)
     {
         std::cout << "ODCZYT  " << Offset << std::endl;
@@ -26,6 +50,10 @@ bool AtaDisk::DiskRead(int Offset, int Length)
     if (FileName.length() == 0)
     {
         ReadWriteError = true;
+        if (DebugLogInOut)
+        {
+            DebugLogData(LogInfo + "ERROR 1\n");
+        }
         return false;
     }
 
@@ -37,21 +65,46 @@ bool AtaDisk::DiskRead(int Offset, int Length)
         if ((Offset + Length) > FileSize)
         {
             F.close();
+            if (DebugLogInOut)
+            {
+                DebugLogData(LogInfo + "ERROR 2\n");
+            }
             return false;
         }
         F.seekg(Offset);
         F.read(DiskSector, Length);
         F.close();
+        if (DebugLogInOut)
+        {
+            for (int I = 0; I < Length; I++)
+            {
+                LogInfo = LogInfo + " " + Eden::IntToHex8((uchar)DiskSector[I]);
+            }
+            DebugLogData(LogInfo + "\n");
+        }
         return true;
     }
     else
     {
+        if (DebugLogInOut)
+        {
+            DebugLogData(LogInfo + "ERROR 3\n");
+        }
         return false;
     }
 }
 
 bool AtaDisk::DiskWrite(int Offset, int Length)
 {
+    string LogInfo = "";
+    if (DebugLogInOut)
+    {
+        LogInfo = DiskSlave ? "SLAVE   " : "MASTER  ";
+        LogInfo = LogInfo + "WRITE   ";
+        LogInfo = LogInfo + "OFFSET=" + Eden::IntToHex32(Offset) + "    ";
+        LogInfo = LogInfo + "LENGTH=" + Eden::IntToHex32(Length) + "    ";
+    }
+
     if (DebugMsg)
     {
         std::cout << "ZAPIS   " << Offset << std::endl;
@@ -61,6 +114,10 @@ bool AtaDisk::DiskWrite(int Offset, int Length)
     if (FileName.length() == 0)
     {
         ReadWriteError = true;
+        if (DebugLogInOut)
+        {
+            DebugLogData(LogInfo + "ERROR 1\n");
+        }
         return false;
     }
 
@@ -72,25 +129,54 @@ bool AtaDisk::DiskWrite(int Offset, int Length)
         if ((Offset + Length) > FileSize)
         {
             F.close();
+            if (DebugLogInOut)
+            {
+                DebugLogData(LogInfo + "ERROR 2\n");
+            }
             return false;
         }
         F.seekg(Offset);
         F.write(DiskSector, Length);
         F.close();
+        if (DebugLogInOut)
+        {
+            for (int I = 0; I < Length; I++)
+            {
+                LogInfo = LogInfo + " " + Eden::IntToHex8((uchar)DiskSector[I]);
+            }
+            DebugLogData(LogInfo + "\n");
+        }
         return true;
     }
     else
     {
+        if (DebugLogInOut)
+        {
+            DebugLogData(LogInfo + "ERROR 3\n");
+        }
         return false;
     }
 }
 
 bool AtaDisk::DiskCheck(int Offset, int Length)
 {
+    string LogInfo = "";
+    if (DebugLogInOut)
+    {
+        LogInfo = DiskSlave ? "SLAVE   " : "MASTER  ";
+        LogInfo = LogInfo + "CHECK   ";
+        LogInfo = LogInfo + "OFFSET=" + Eden::IntToHex32(Offset) + "    ";
+        LogInfo = LogInfo + "LENGTH=" + Eden::IntToHex32(Length) + "    ";
+    }
+
     string FileName = DiskSlave ? Disk1Name : Disk0Name;
     if (FileName.length() == 0)
     {
         ReadWriteError = true;
+        if (DebugLogInOut)
+        {
+            DebugLogData(LogInfo + "ERROR 1\n");
+        }
         return false;
     }
 
@@ -103,15 +189,27 @@ bool AtaDisk::DiskCheck(int Offset, int Length)
         {
             F.close();
             ReadWriteError = true;
+            if (DebugLogInOut)
+            {
+                DebugLogData(LogInfo + "ERROR 2\n");
+            }
             return false;
         }
         F.close();
         ReadWriteError = false;
+        if (DebugLogInOut)
+        {
+            DebugLogData(LogInfo + "OK\n");
+        }
         return true;
     }
     else
     {
         ReadWriteError = true;
+        if (DebugLogInOut)
+        {
+            DebugLogData(LogInfo + "ERROR 3\n");
+        }
         return false;
     }
 }
@@ -167,11 +265,19 @@ uchar AtaDisk::DoIN(uchar Addr)
                 {
                     std::cout << "ATA IN  " << Eden::IntToHex8(Addr) << "    " << Eden::IntToHex8(Val) << std::endl;
                 }
+                if (DebugLogCmd)
+                {
+                    DebugLogData("ATA IN  " + Eden::IntToHex8(Addr) + "    " + Eden::IntToHex8(Val) + "\n");
+                }
                 return Val;
             }
             if (DebugMsg)
             {
                 std::cout << "ATA IN  " << Eden::IntToHex8(Addr) << "    " << std::endl;
+            }
+            if (DebugLogCmd)
+            {
+                DebugLogData("ATA IN  " + Eden::IntToHex8(Addr) + "    " + Eden::IntToHex8(0) + "\n");
             }
             return 0;
         case 0x17: // 07 Status
@@ -205,12 +311,20 @@ uchar AtaDisk::DoIN(uchar Addr)
                 {
                     std::cout << "ATA IN  " << Eden::IntToHex8(Addr) << "    " << Eden::IntToHex8(Val) << std::endl;
                 }
+                if (DebugLogCmd)
+                {
+                    DebugLogData("ATA IN  " + Eden::IntToHex8(Addr) + "    " + Eden::IntToHex8(Val) + "\n");
+                }
                 return Val;
             }
         default:
             if (DebugMsg)
             {
                 std::cout << "ATA IN  " << Eden::IntToHex8(Addr) << std::endl;
+            }
+            if (DebugLogCmd)
+            {
+                DebugLogData("ATA IN  " + Eden::IntToHex8(Addr) + "    " + Eden::IntToHex8(0) + "\n");
             }
             return 0;
     }
@@ -221,6 +335,10 @@ void AtaDisk::DoOUT(uchar Addr, uchar Val)
     if (DebugMsg)
     {
         std::cout << "ATA OUT " << Eden::IntToHex8(Addr) << "    " << Eden::IntToHex8(Val) << std::endl;
+    }
+    if (DebugLogCmd)
+    {
+        DebugLogData("ATA OUT " + Eden::IntToHex8(Addr) + "    " + Eden::IntToHex8(Val) + "\n");
     }
     switch (Addr)
     {

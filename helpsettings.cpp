@@ -32,6 +32,8 @@ void HelpSettings::Init()
     ui->DebugReg4->setChecked(Core->CpuMem_->DebugReg4);
     ui->DebugTraceRange1T->setText(Eden::ToQStr(Eden::IntToHex16(Core->CpuMem_->DebugTraceRange1)));
     ui->DebugTraceRange2T->setText(Eden::ToQStr(Eden::IntToHex16(Core->CpuMem_->DebugTraceRange2)));
+    ui->DebugDisk->setChecked(Core->AtaDisk_->DebugLogInOut);
+    ui->DebugDiskCmd->setChecked(Core->AtaDisk_->DebugLogCmd);
     ui->AudioAYFreqT->setText(Eden::ToQStr(Core->AudioAY_->ChipClock));
     ui->InterruptPeriodT->setText(Eden::ToQStr(Core->CpuMem_->InterruptPeriod));
 
@@ -142,4 +144,14 @@ void HelpSettings::on_DebugTraceRange1T_textChanged(const QString &arg1)
 void HelpSettings::on_DebugTraceRange2T_textChanged(const QString &arg1)
 {
     Core->CpuMem_->DebugTraceRange2 = Eden::HexToInt(Eden::ToStr(arg1));
+}
+
+void HelpSettings::on_DebugDisk_toggled(bool checked)
+{
+    Core->AtaDisk_->DebugLogInOut = checked;
+}
+
+void HelpSettings::on_DebugDiskCmd_toggled(bool checked)
+{
+    Core->AtaDisk_->DebugLogCmd = checked;
 }

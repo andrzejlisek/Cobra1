@@ -76,6 +76,8 @@ AppCore::AppCore()
     CF.ParamGet("CpuMem_DebugReg4", CpuMem_->DebugReg4);
     CF.ParamGet("CpuMem_DebugTraceRange1", CpuMem_->DebugTraceRange1);
     CF.ParamGet("CpuMem_DebugTraceRange2", CpuMem_->DebugTraceRange2);
+    CF.ParamGet("AtaDisk_DebugLogInOut", AtaDisk_->DebugLogInOut);
+    CF.ParamGet("AtaDisk_DebugLogCmd", AtaDisk_->DebugLogCmd);
     CF.ParamGet("Tape_SetThreshold", Tape_->SetThreshold);
     CF.ParamGet("Tape_SetThreshold0", Tape_->SetThreshold0);
     CF.ParamGet("Tape_SetSample", Tape_->SetSample);
@@ -133,8 +135,10 @@ void AppCore::SettingsSave()
     CF.ParamSet("CpuMem_DebugReg2", CpuMem_->DebugReg2);
     CF.ParamSet("CpuMem_DebugReg3", CpuMem_->DebugReg3);
     CF.ParamSet("CpuMem_DebugReg4", CpuMem_->DebugReg4);
-    CF.ParamGet("CpuMem_DebugTraceRange1", CpuMem_->DebugTraceRange1);
-    CF.ParamGet("CpuMem_DebugTraceRange2", CpuMem_->DebugTraceRange2);
+    CF.ParamSet("CpuMem_DebugTraceRange1", CpuMem_->DebugTraceRange1);
+    CF.ParamSet("CpuMem_DebugTraceRange2", CpuMem_->DebugTraceRange2);
+    CF.ParamSet("AtaDisk_DebugLogInOut", AtaDisk_->DebugLogInOut);
+    CF.ParamSet("AtaDisk_DebugLogCmd", AtaDisk_->DebugLogCmd);
     CF.ParamSet("Tape_SetThreshold", Tape_->SetThreshold);
     CF.ParamSet("Tape_SetThreshold0", Tape_->SetThreshold0);
     CF.ParamSet("Tape_SetSample", Tape_->SetSample);

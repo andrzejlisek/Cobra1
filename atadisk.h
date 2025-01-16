@@ -7,6 +7,8 @@
 class AtaDisk
 {
 public:
+    bool DebugLogInOut;
+    bool DebugLogCmd;
     AtaDisk();
     bool IsAtaAddr(uchar Addr);
     uchar DoIN(uchar Addr);
@@ -24,6 +26,7 @@ private:
     bool DiskSlave;
     int DiskSectorSize;
     int ReadWriteCounter;
+    void DebugLogData(string str);
 
     // 0 - Stan bezczynny
     // 1 - Odczyt

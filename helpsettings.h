@@ -60,6 +60,10 @@ private slots:
 
     void on_DebugTraceRange2T_textChanged(const QString &arg1);
 
+    void on_DebugDisk_toggled(bool checked);
+
+    void on_DebugDiskCmd_toggled(bool checked);
+
 private:
     Ui::HelpSettings *ui;
 };
