@@ -34,7 +34,7 @@ public:
     int SoundVolumeGen = 100;
     int SoundVolumeAY = 100;
 
-    int KeybMode = 0;
+    int KeybModeEvent = 0;
     int KeybModeText = 0;
 
     Screen * Screen_;
@@ -55,7 +55,6 @@ public:
     void LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X);
     bool LoadKeyStreamCaps = true;
     void LoadKeysVal(bool P, bool R, bool IsShift, int KeyCode);
-    bool LoadKeysShiftState = false;
     int KeySpeed = 20;
     int LinePause = 2;
     void SetCaps(bool C, bool NewCaps);

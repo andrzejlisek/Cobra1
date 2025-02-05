@@ -38,10 +38,10 @@ void ScreenKeyb::keyReleaseEvent(QKeyEvent* event)
 
 void ScreenKeyb::Init()
 {
-    ui->KeybSelect->setCurrentIndex(Core->KeybMode);
+    ui->KeybSelect->setCurrentIndex(Core->KeybModeEvent);
     ui->SendSpeed->setText(Eden::ToQStr(Core->KeySpeed));
     ui->LinePause->setText(Eden::ToQStr(Core->LinePause));
-    ui->SendExt->setChecked(Core->KeybModeText != 0);
+    ui->SendTypeKeyb->setCurrentIndex(Core->KeybModeText);
     ui->ReceivePrinter->setCurrentIndex(Core->CpuMem_->Printer);
 }
 
@@ -99,7 +99,7 @@ void ScreenKeyb::on_LinePause_textChanged(const QString &arg1)
 
 void ScreenKeyb::on_KeybSelect_currentIndexChanged(int index)
 {
-    Core->KeybMode = index;
+    Core->KeybModeEvent = index;
     if (index == 0)
     {
         ui->KeybInfo->setText("");
@@ -108,16 +108,13 @@ void ScreenKeyb::on_KeybSelect_currentIndexChanged(int index)
     {
         ui->KeybInfo->setText("` - CAP   { - CTR   } - CLS   \\ - SH   Enter - CR");
     }
+    if (index == 2)
+    {
+        ui->KeybInfo->setText("BRAK REAKCJI");
+    }
 }
 
-void ScreenKeyb::on_SendExt_toggled(bool checked)
+void ScreenKeyb::on_SendTypeKeyb_currentIndexChanged(int index)
 {
-    if (checked)
-    {
-        Core->KeybModeText = 1;
-    }
-    else
-    {
-        Core->KeybModeText = 0;
-    }
+    Core->KeybModeText = index;
 }

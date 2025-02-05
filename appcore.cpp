@@ -54,7 +54,7 @@ AppCore::AppCore()
 
     EdenClass::ConfigFile CF;
     CF.FileLoad(Eden::ApplicationDirectory() + "cobra1.cfg");
-    CF.ParamGet("KeybMode", KeybMode);
+    CF.ParamGet("KeybMode", KeybModeEvent);
     CF.ParamGet("KeybModeText", KeybModeText);
     CF.ParamGet("KeySpeed", KeySpeed);
     CF.ParamGet("LinePause", LinePause);
@@ -115,7 +115,7 @@ AppCore::~AppCore()
 void AppCore::SettingsSave()
 {
     EdenClass::ConfigFile CF;
-    CF.ParamSet("KeybMode", KeybMode);
+    CF.ParamSet("KeybMode", KeybModeEvent);
     CF.ParamSet("KeybModeText", KeybModeText);
     CF.ParamSet("KeySpeed", KeySpeed);
     CF.ParamSet("LinePause", LinePause);
@@ -317,27 +317,19 @@ void AppCore::LoadKeysVal(bool P, bool R, bool IsShift, int KeyCode)
     {
         if (P)
         {
-            if (!LoadKeysShiftState)
-            {
-                Keyboard_->KeyStrokes->push_back(b00000000 + (8 << 8));
-                LoadKeysShiftState = true;
-            }
+            Keyboard_->KeyStrokes->push_back(b00000000 + (8 << 8));
             Keyboard_->KeyStrokes->push_back(b00000000 + KeyCode);
         }
         if (R)
         {
             Keyboard_->KeyStrokes->push_back(b10000000 + KeyCode);
+            Keyboard_->KeyStrokes->push_back(b10000000 + (8 << 8));
         }
     }
     else
     {
         if (P)
         {
-            if (LoadKeysShiftState)
-            {
-                Keyboard_->KeyStrokes->push_back(b10000000 + (8 << 8));
-                LoadKeysShiftState = false;
-            }
             Keyboard_->KeyStrokes->push_back(b00000000 + KeyCode);
         }
         if (R)
@@ -411,8 +403,6 @@ void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X
         SetCaps(C, true);
     }
 
-    LoadKeysShiftState = false;
-
     // Wypelnianie wektora nacisniec klawiszy
     for (int I = 0; I < X; I++)
     {
@@ -432,6 +422,7 @@ void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X
                         case 'D': LoadKeysVal(P, R, 1, ( 8 << 8) + b00000001); break;
                         case 'L': LoadKeysVal(P, R, 1, ( 9 << 8) + b00000000); break;
                         case 'R': LoadKeysVal(P, R, 1, ( 9 << 8) + b00000001); break;
+                        case 'B': LoadKeysVal(P, R, 0, (15 << 8) + b00000001); break;
                     }
                 }
                 break;
@@ -439,7 +430,7 @@ void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X
             case '\n': if (EOL == '\n') { LoadKeysVal(P, R, 0, (14 << 8) + b00000000); if (M == 0) { for (int II = 0; II < LinePause; II++) { Keyboard_->KeyStrokes->push_back(b01000000); Keyboard_->KeyStrokes->push_back(b01000000); } } } break;
         }
 
-        if (KeybModeText == 0)
+        if ((KeybModeText == 0) || (KeybModeText == 2))
         {
             switch (Temp[I])
             {
@@ -539,9 +530,23 @@ void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X
                 case 'M': SetCaps(C, true);   LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
                 case 'm': SetCaps(C, false);  LoadKeysVal(P, R, 0, (15 << 8) + b00000010); break;
                 case '>':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000010); break;
+                case ' ':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000000); break;
+            }
+        }
+        if (KeybModeText == 0)
+        {
+            switch (Temp[I])
+            {
                 case ',':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000001); break;
                 case '.':                     LoadKeysVal(P, R, 1, (15 << 8) + b00000001); break;
-                case ' ':                     LoadKeysVal(P, R, 0, (15 << 8) + b00000000); break;
+            }
+        }
+        if (KeybModeText == 2)
+        {
+            switch (Temp[I])
+            {
+                case ',':                     LoadKeysVal(P, R, 1, (12 << 8) + b00000000); break;
+                case '.':                     LoadKeysVal(P, R, 1, (10 << 8) + b00000011); break;
             }
         }
         if (KeybModeText == 1)
@@ -665,13 +670,6 @@ void AppCore::LoadKeyStream(bool P, bool R, bool C, uchar M, uchar * Temp, int X
         SetCaps(C, true);
     }
 
-    // Zwolnienie klawisza Shift
-    if (LoadKeysShiftState)
-    {
-        LoadKeysVal(0, 1, 0, ( 8 << 8) + b00000000);
-        LoadKeysShiftState = 0;
-    }
-
     // Zlecenie przetworzenia wektora nacisniec klawiszy
     Keyboard_->StartKeystrokes(KeySpeed);
 }
@@ -703,10 +701,18 @@ void AppCore::KeyPressRelease(QKeyEvent *event, bool Press)
             IsNumpad = true;
         }
 
-        if (KeybMode == 0)
+        /*if (Press)
         {
-            //cout << "{" << (int)event->key() << "_" << Eden::IntToHex32(event->key()) << "}=[" << Eden::ToStr(event->text()) << "]" << IsNumpad << endl;
+            cout << "PRESS   ";
+        }
+        else
+        {
+            cout << "RELEASE ";
+        }
+        cout << "{" << (int)event->key() << "_" << Eden::IntToHex32(event->key()) << "}=[" << Eden::ToStr(event->text()) << "]" << IsNumpad << endl;*/
 
+        if (KeybModeEvent == 0)
+        {
             if (IsNumpad)
             {
                 switch ((int)event->key())
@@ -829,7 +835,7 @@ void AppCore::KeyPressRelease(QKeyEvent *event, bool Press)
                 }
             }
         }
-        if (KeybMode == 1)
+        if (KeybModeEvent == 1)
         {
             bool TextKey = true;
             switch ((int)event->key())
@@ -859,6 +865,10 @@ void AppCore::KeyPressRelease(QKeyEvent *event, bool Press)
                     TextKey = false;
                     break;
                 case Qt::Key_Shift: // Shift
+                    TextKey = false;
+                    break;
+                case Qt::Key_Backspace: // Backspace
+                    LoadKeyStream(Press, !Press, true, 1, (uchar*)"~B", 1);
                     TextKey = false;
                     break;
             }

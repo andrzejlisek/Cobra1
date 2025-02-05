@@ -249,7 +249,7 @@ T</string>
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>
+         <string>.
 R</string>
         </property>
        </widget>
@@ -510,7 +510,7 @@ F</string>
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>
+         <string>,
 0</string>
         </property>
        </widget>
@@ -1217,6 +1217,11 @@ P</string>
           <string>PC</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Brak</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="3" column="1">
@@ -1377,8 +1382,58 @@ Z</string>
      <property name="title">
       <string>Wysyłanie tekstu</string>
      </property>
-     <layout class="QGridLayout" name="PanelSend" columnstretch="2,1,1,0">
-      <item row="1" column="0" colspan="4">
+     <layout class="QGridLayout" name="PanelSend" columnstretch="2,0,0,0,0">
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="LinePause">
+        <property name="text">
+         <string>2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="SendTypeKeyb">
+        <item>
+         <property name="text">
+          <string>Standard</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Rozsz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Klawisz BS</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="SendSpeed">
+        <property name="text">
+         <string>20</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="SendLabel">
+        <property name="text">
+         <string>Klaw/sek | Po Enter</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="4">
+       <widget class="QPushButton" name="SendStart">
+        <property name="text">
+         <string>Wyślij</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="5">
        <widget class="QPlainTextEdit" name="SendText">
         <property name="font">
          <font>
@@ -1391,48 +1446,10 @@ Z</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="LinePause">
-        <property name="text">
-         <string>2</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1" colspan="3">
-       <widget class="QPushButton" name="SendStart">
-        <property name="text">
-         <string>Wyślij</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0">
        <widget class="QPushButton" name="SendClear">
         <property name="text">
          <string>Wyczyść</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="SendLabel">
-        <property name="text">
-         <string>Klawisze na sekundę | Przerwa po Enter</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="SendSpeed">
-        <property name="text">
-         <string>20</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="3">
-       <widget class="QCheckBox" name="SendExt">
-        <property name="text">
-         <string>Klawiatura rozszerzona</string>
         </property>
        </widget>
       </item>

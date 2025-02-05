@@ -40,7 +40,7 @@ private slots:
 
     void on_KeybSelect_currentIndexChanged(int index);
 
-    void on_SendExt_toggled(bool checked);
+    void on_SendTypeKeyb_currentIndexChanged(int index);
 
 private:
     Ui::ScreenKeyb *ui;
