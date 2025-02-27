@@ -47,6 +47,13 @@
 class CpuMem
 {
 public:
+    // 0 - Tryb standardowy 32x24
+    // 1 - Tryb 64x24
+    int GraphicsMode = 0;
+    int GraphicsState = 0;
+    uchar GraphicsMem[16384];
+
+
     void LoadRom(string AppDir, string RomFile, string LstFile, string RamFile);
     bool MemDumpEnabled = false;
     int FontNo = 0;

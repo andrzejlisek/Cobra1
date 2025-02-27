@@ -59,6 +59,7 @@ AppCore::AppCore()
     CF.ParamGet("KeySpeed", KeySpeed);
     CF.ParamGet("LinePause", LinePause);
     CF.ParamGet("CpuMem_Printer", CpuMem_->Printer);
+    CF.ParamGet("Screen_ScreenMode", CpuMem_->GraphicsMode);
     CF.ParamGet("Screen_ScreenNegative", Screen_->ScreenNegative);
     CF.ParamGet("Screen_ScreenColor", Screen_->ScreenColor);
     CF.ParamGet("CpuMem_ScreenMemCommon", CpuMem_->ScreenMemCommon);
@@ -120,6 +121,7 @@ void AppCore::SettingsSave()
     CF.ParamSet("KeySpeed", KeySpeed);
     CF.ParamSet("LinePause", LinePause);
     CF.ParamSet("CpuMem_Printer", CpuMem_->Printer);
+    CF.ParamSet("Screen_ScreenMode", CpuMem_->GraphicsMode);
     CF.ParamSet("Screen_ScreenNegative", Screen_->ScreenNegative);
     CF.ParamSet("Screen_ScreenColor", Screen_->ScreenColor);
     CF.ParamSet("CpuMem_ScreenMemCommon", CpuMem_->ScreenMemCommon);

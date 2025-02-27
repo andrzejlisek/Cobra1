@@ -15,6 +15,7 @@ HelpSettings::~HelpSettings()
 
 void HelpSettings::Init()
 {
+    ui->ScreenGraphModeT->setCurrentIndex(Core->CpuMem_->GraphicsMode);
     ui->ScreenNegative->setChecked(Core->Screen_->ScreenNegative);
     ui->ScreenColors->setChecked(Core->Screen_->ScreenColor);
     ui->ScreenMemCommon->setChecked(Core->CpuMem_->ScreenMemCommon);
@@ -154,4 +155,10 @@ void HelpSettings::on_DebugDisk_toggled(bool checked)
 void HelpSettings::on_DebugDiskCmd_toggled(bool checked)
 {
     Core->AtaDisk_->DebugLogCmd = checked;
+}
+
+void HelpSettings::on_ScreenGraphModeT_currentIndexChanged(int index)
+{
+    Core->CpuMem_->GraphicsMode = index;
+    Core->Screen_->Forced = true;
 }

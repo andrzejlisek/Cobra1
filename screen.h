@@ -45,9 +45,11 @@ public:
     uchar * ScrRaw;
 
 private:
+    static constexpr int ScreenW = 64;
+    static constexpr int ScreenH = 64;
     uchar Font[257][256][8][8];
-    uchar Scr[32][24];
-    uchar Clr[32][24];
+    uchar Scr[ScreenW][ScreenH];
+    uchar Clr[ScreenW][ScreenH];
     uchar FontCust[256][8];
 };
 

@@ -51,6 +51,7 @@ private:
     QTimer Timer;
 
     string InputBox(string Query, string Title, string Default);
+    void GraphRepaint();
 
 
 private slots:

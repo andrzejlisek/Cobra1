@@ -7,6 +7,11 @@ CpuMem::CpuMem()
 
     // Resetowanie dzwieku
     SoundReset();
+
+    for (int I = 0; I < 16384; I++)
+    {
+        GraphicsMem[I] = 0;
+    }
 }
 
 CpuMem::~CpuMem()
@@ -154,6 +159,28 @@ void CpuMem::MemSet(ushort Addr, uchar Val)
     {
         cout << "XX " << Eden::IntToHex16(MemAddr(Addr)) << "=" << Eden::IntToHex8(Val) << endl;
     }*/
+    if (GraphicsMode == 1)
+    {
+        if ((Addr >= 0xF800) && (Addr <= 0xFFFF))
+        {
+            if (ScreenMemCommon)
+            {
+                GraphicsMem[Addr - 0xF800] = Val;
+                GraphicsMem[Addr - 0xF800 + 8192] = Val;
+            }
+            else
+            {
+                if (GraphicsState == 0)
+                {
+                    GraphicsMem[Addr - 0xF800] = Val;
+                }
+                if (GraphicsState == 1)
+                {
+                    GraphicsMem[Addr - 0xF800 + 8192] = Val;
+                }
+            }
+        }
+    }
 }
 
 ///
@@ -183,6 +210,28 @@ void CpuMem::MemSet(ushort AddrH, ushort AddrL, uchar Val)
     {
         cout << "YY " << Eden::IntToHex16(MemAddr(MemAddr((AddrH << 8) + AddrL))) << "=" << Eden::IntToHex8(Val) << endl;
     }*/
+    if (GraphicsMode == 1)
+    {
+        if ((AddrH >= 0xF8) && (AddrH <= 0xFF))
+        {
+            if (ScreenMemCommon)
+            {
+                GraphicsMem[(AddrH << 8) + AddrL - 0xF800] = Val;
+                GraphicsMem[(AddrH << 8) + AddrL - 0xF800 + 8192] = Val;
+            }
+            else
+            {
+                if (GraphicsState == 0)
+                {
+                    GraphicsMem[(AddrH << 8) + AddrL - 0xF800] = Val;
+                }
+                if (GraphicsState == 1)
+                {
+                    GraphicsMem[(AddrH << 8) + AddrL - 0xF800 + 8192] = Val;
+                }
+            }
+        }
+    }
 }
 
 ///
@@ -4566,7 +4615,7 @@ void CpuMem::DoOUT(uchar AddrH, uchar AddrL, uchar &Reg)
         SoundLevel1 = 1 - SoundLevel1;
     }
 
-    // AY-3-8910 - numer rejestr
+    // AY-3-8910 - numer rejestru
     if ((AddrH == 0xFF) && (AddrL == 0xFD))
     {
         AudioAY_->SetRegN(Reg);
@@ -4629,6 +4678,15 @@ void CpuMem::DoOUT(uchar AddrH, uchar AddrL, uchar &Reg)
         if (Reg >= 128)
         {
             FontNo = 256;
+        }
+
+        if (Reg & b01000000)
+        {
+            GraphicsState = 1;
+        }
+        else
+        {
+            GraphicsState = 0;
         }
     }
 

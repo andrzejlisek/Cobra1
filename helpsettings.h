@@ -64,6 +64,8 @@ private slots:
 
     void on_DebugDiskCmd_toggled(bool checked);
 
+    void on_ScreenGraphModeT_currentIndexChanged(int index);
+
 private:
     Ui::HelpSettings *ui;
 };

@@ -196,6 +196,27 @@ F11 - Jeden krok</string>
       <item row="8" column="1">
        <widget class="QLineEdit" name="InterruptPeriodT"/>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="ScreenGraphModeL">
+        <property name="text">
+         <string>Układ graficzny</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="ScreenGraphModeT">
+        <item>
+         <property name="text">
+          <string>Standardowy</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>64x25</string>
+         </property>
+        </item>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

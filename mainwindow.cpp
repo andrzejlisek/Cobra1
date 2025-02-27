@@ -205,6 +205,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     QMainWindow::resizeEvent(event);
+    GraphRepaint();
+}
+
+void MainWindow::GraphRepaint()
+{
     Core->Screen_->Resize(width(), height());
     Core->Screen_->Refresh();
     ui->ScreenView->setPixmap(QPixmap::fromImage(*Core->Screen_->ScrImg));
@@ -256,6 +261,10 @@ void MainWindow::TimerEvent()
         Core->PlayBeep();
         Core->Screen_->FontNo = Core->CpuMem_->FontNo;
         TapePlayer_->DispPos();
+        if (Core->Screen_->Forced)
+        {
+            GraphRepaint();
+        }
         if (Core->Screen_->Refresh())
         {
             ui->ScreenView->setPixmap(QPixmap::fromImage(*Core->Screen_->ScrImg));

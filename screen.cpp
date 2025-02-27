@@ -2,6 +2,7 @@
 
 Screen::Screen()
 {
+    CpuMem_ = NULL;
     ScreenNegative = false;
     ScreenColor = false;
 
@@ -28,6 +29,12 @@ Screen::Screen()
     ColorR[15] = C2; ColorG[15] = C2; ColorB[15] = C2;
 
     // Ustawianie domyslnych wymiarow ekanu
+    PicW = 1;
+    PicH = 1;
+    OffsetX = 0;
+    OffsetY = 0;
+    XSize = 0;
+    YSize = 0;
     ScrImg = new QImage(1, 1, QImage::Format_RGB32);
     Resize(2, 2);
 }
@@ -191,12 +198,23 @@ void Screen::Resize(int X, int Y)
     delete ScrImg;
     PicW = X;
     PicH = Y;
-    XSize = PicW / (32 * 8);
-    YSize = PicH / (24 * 8);
 
-    OffsetX = (PicW - (32 * 8 * XSize)) / 2;
-    OffsetY = (PicH - (24 * 8 * YSize)) / 2;
+    int ScreenW__ = 32;
+    int ScreenH__ = 24;
 
+    if (CpuMem_)
+    {
+        if (CpuMem_->GraphicsMode == 1)
+        {
+            ScreenW__ = 64;
+        }
+    }
+
+    XSize = PicW / (ScreenW__ * 8);
+    YSize = PicH / (ScreenH__ * 8);
+
+    OffsetX = (PicW - (ScreenW__ * 8 * XSize)) / 2;
+    OffsetY = (PicH - (ScreenH__ * 8 * YSize)) / 2;
 
     ScrImg = new QImage(PicW, PicH, QImage::Format_RGB32);
     ScrRaw = ScrImg->bits();
@@ -212,9 +230,9 @@ void Screen::Redraw()
         ScrRaw[I] = 0;
     }
 
-    for (int CharY = 0; CharY < 24; CharY++)
+    for (int CharY = 0; CharY < ScreenH; CharY++)
     {
-        for (int CharX = 0; CharX < 32; CharX++)
+        for (int CharX = 0; CharX < ScreenW; CharX++)
         {
             Scr[CharX][CharY] = 0;
             Clr[CharX][CharY] = 15;
@@ -346,19 +364,42 @@ bool Screen::Refresh()
             }
         }
     }
-    for (CharY = 0; CharY < 24; CharY++)
+    if (CpuMem_->GraphicsMode == 0)
     {
-        for (CharX = 0; CharX < 32; CharX++)
+        for (CharY = 0; CharY < 24; CharY++)
         {
-            if (FontChanged || (Scr[CharX][CharY] != CpuMem_->Mem[CharZ]) || (Clr[CharX][CharY] != CpuMem_->Mem[CharC]) || (FontNoX != FontNo))
+            for (CharX = 0; CharX < 32; CharX++)
             {
-                DrawChar(CharX, CharY, CpuMem_->Mem[CharZ], CpuMem_->Mem[CharC]);
-                Scr[CharX][CharY] = CpuMem_->Mem[CharZ];
-                Clr[CharX][CharY] = CpuMem_->Mem[CharC];
-                Changed = true;
+                if (FontChanged || (Scr[CharX][CharY] != CpuMem_->Mem[CharZ]) || (Clr[CharX][CharY] != CpuMem_->Mem[CharC]) || (FontNoX != FontNo))
+                {
+                    DrawChar(CharX, CharY, CpuMem_->Mem[CharZ], CpuMem_->Mem[CharC]);
+                    Scr[CharX][CharY] = CpuMem_->Mem[CharZ];
+                    Clr[CharX][CharY] = CpuMem_->Mem[CharC];
+                    Changed = true;
+                }
+                CharZ++;
+                CharC++;
             }
-            CharZ++;
-            CharC++;
+        }
+    }
+    if (CpuMem_->GraphicsMode == 1)
+    {
+        CharZ = 0;
+        CharC = 8192;
+        for (CharY = 0; CharY < 24; CharY++)
+        {
+            for (CharX = 0; CharX < 64; CharX++)
+            {
+                if (FontChanged || (Scr[CharX][CharY] != CpuMem_->GraphicsMem[CharZ]) || (Clr[CharX][CharY] != CpuMem_->GraphicsMem[CharC]) || (FontNoX != FontNo))
+                {
+                    DrawChar(CharX, CharY, CpuMem_->GraphicsMem[CharZ], CpuMem_->GraphicsMem[CharC]);
+                    Scr[CharX][CharY] = CpuMem_->GraphicsMem[CharZ];
+                    Clr[CharX][CharY] = CpuMem_->GraphicsMem[CharC];
+                    Changed = true;
+                }
+                CharZ++;
+                CharC++;
+            }
         }
     }
     FontNoX = FontNo;
